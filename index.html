@@ -3,220 +3,347 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StockControl Pro</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Glamour Stock · Control de Inventario</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Mono:wght@400;500&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:#0d0f14; --surface:#161a24; --surface2:#1e2436; --border:#2a3050;
-    --accent:#f0c040; --accent2:#4af0a0; --danger:#f05050; --warn:#f09040;
-    --text:#e8eaf0; --muted:#6a7290; --radius:12px;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+:root {
+  --bg:#0f0d12; --surface:#1a1720; --surface2:#221f2a; --border:#2e2a3a;
+  --rose:#f472b6; --rose2:#fb7bb8; --gold:#f8c94a; --mint:#4af0b0;
+  --lavender:#c084fc; --danger:#f87171; --warn:#fb923c;
+  --text:#f0ecf8; --muted:#7a7090; --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 
-  /* CONFIG BANNER */
-  #config-banner{
-    background:rgba(240,192,64,.12);border-bottom:1px solid rgba(240,192,64,.3);
-    padding:10px 32px;display:flex;align-items:center;gap:12px;font-size:.84rem;
-  }
-  #config-banner input{
-    background:var(--bg);border:1px solid var(--border);border-radius:6px;
-    padding:5px 10px;color:var(--text);font-family:'DM Mono',monospace;font-size:.78rem;
-    width:420px;outline:none;
-  }
-  #config-banner input:focus{border-color:var(--accent)}
-  .btn-config{
-    background:var(--accent);color:#111;font-family:'Syne',sans-serif;font-weight:700;
-    font-size:.8rem;padding:6px 14px;border:none;border-radius:6px;cursor:pointer;transition:.15s;
-  }
-  .btn-config:hover{filter:brightness(1.1)}
-  .config-ok{color:var(--accent2);font-family:'DM Mono',monospace;font-size:.78rem}
+/* BG texture */
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse at 10% 20%, rgba(244,114,182,.06) 0%, transparent 50%),
+  radial-gradient(ellipse at 90% 80%, rgba(192,132,252,.05) 0%, transparent 50%);
+  pointer-events:none;z-index:0}
 
-  /* HEADER */
-  header{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:16px 32px;background:var(--surface);
-    border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;
-  }
-  .brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-.5px}
-  .brand span{color:var(--accent)}
-  .header-right{display:flex;align-items:center;gap:16px}
-  .sync-info{font-size:.75rem;color:var(--muted);font-family:'DM Mono',monospace}
-  .btn-refresh{
-    background:transparent;border:1px solid var(--border);border-radius:6px;
-    padding:6px 12px;color:var(--muted);cursor:pointer;font-size:.8rem;transition:.15s;
-  }
-  .btn-refresh:hover{border-color:var(--accent2);color:var(--accent2)}
-  .user-tabs{display:flex;gap:6px}
-  .user-tab{
-    font-size:.76rem;font-family:'DM Mono',monospace;padding:5px 12px;
-    border-radius:99px;border:1px solid var(--border);background:transparent;
-    color:var(--muted);cursor:pointer;transition:.2s;
-  }
-  .user-tab.active{background:var(--accent);color:#111;border-color:var(--accent);font-weight:500}
-  .user-tab:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+/* CONFIG BANNER */
+#config-banner{
+  position:relative;z-index:10;background:rgba(248,201,74,.08);
+  border-bottom:1px solid rgba(248,201,74,.2);
+  padding:10px 28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+#config-banner span.lbl{font-size:.76rem;color:var(--gold);font-family:'DM Mono',monospace}
+#api-url-input{
+  background:rgba(0,0,0,.3);border:1px solid rgba(248,201,74,.25);border-radius:7px;
+  padding:5px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:.76rem;
+  width:380px;outline:none;transition:.2s;
+}
+#api-url-input:focus{border-color:var(--gold)}
+.btn-connect{
+  background:var(--gold);color:#1a1400;font-family:'Nunito',sans-serif;font-weight:700;
+  font-size:.8rem;padding:6px 16px;border:none;border-radius:7px;cursor:pointer;transition:.15s;
+}
+.btn-connect:hover{filter:brightness(1.1)}
+#conn-status{font-size:.75rem;font-family:'DM Mono',monospace;color:var(--mint)}
 
-  /* LAYOUT */
-  .app{display:grid;grid-template-columns:248px 1fr;min-height:calc(100vh - 61px)}
-  aside{
-    background:var(--surface);border-right:1px solid var(--border);
-    padding:20px 14px;display:flex;flex-direction:column;gap:4px;
-  }
-  .nav-label{font-size:.66rem;font-family:'DM Mono',monospace;color:var(--muted);
-    padding:8px 12px 4px;letter-spacing:.1em;text-transform:uppercase}
-  .nav-btn{
-    display:flex;align-items:center;gap:10px;padding:9px 12px;
-    border-radius:8px;border:none;background:transparent;color:var(--muted);
-    cursor:pointer;font-size:.86rem;font-family:'DM Sans',sans-serif;
-    transition:.15s;width:100%;text-align:left;
-  }
-  .nav-btn .ico{font-size:.95rem;width:20px;text-align:center}
-  .nav-btn:hover{background:var(--surface2);color:var(--text)}
-  .nav-btn.active{background:rgba(240,192,64,.12);color:var(--accent)}
-  .nav-btn .badge{
-    margin-left:auto;font-size:.68rem;font-family:'DM Mono',monospace;
-    background:var(--danger);color:#fff;border-radius:99px;padding:1px 7px;min-width:20px;text-align:center;
-  }
-  .session-box{padding:12px;margin-top:auto;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
-  .session-box .slbl{font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.06em}
-  .session-box .sval{font-size:.86rem;color:var(--text);margin-top:3px}
-  .session-box .srole{font-size:.72rem;color:var(--accent);font-family:'DM Mono',monospace}
+/* HEADER */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(15,13,18,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{font-size:1.4rem}
+.brand-text{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700}
+.brand-text span{color:var(--rose)}
+.header-right{display:flex;align-items:center;gap:12px}
+.sync-badge{
+  font-size:.7rem;font-family:'DM Mono',monospace;color:var(--muted);
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:99px;padding:4px 10px;
+}
+.btn-refresh{
+  background:transparent;border:1px solid var(--border);border-radius:8px;
+  padding:6px 12px;color:var(--muted);cursor:pointer;font-size:.78rem;
+  transition:.15s;font-family:'Nunito',sans-serif;
+}
+.btn-refresh:hover{border-color:var(--mint);color:var(--mint)}
+.user-tabs{display:flex;gap:5px}
+.user-tab{
+  font-size:.74rem;font-family:'DM Mono',monospace;padding:5px 12px;
+  border-radius:99px;border:1px solid var(--border);background:transparent;
+  color:var(--muted);cursor:pointer;transition:.2s;
+}
+.user-tab.active{background:linear-gradient(135deg,var(--rose),var(--lavender));color:#fff;border-color:transparent}
+.user-tab:hover:not(.active){border-color:var(--rose);color:var(--rose)}
 
-  /* MAIN */
-  main{padding:26px 30px;overflow-y:auto}
-  .page{display:none}
-  .page.active{display:block;animation:fadeIn .22s ease}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+/* LAYOUT */
+.app{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 110px);position:relative;z-index:1}
 
-  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.45rem;margin-bottom:4px}
-  .subtitle{color:var(--muted);font-size:.86rem;margin-bottom:22px}
+/* SIDEBAR */
+aside{
+  background:var(--surface);border-right:1px solid var(--border);
+  padding:20px 12px;display:flex;flex-direction:column;gap:3px;
+}
+.nav-section{font-size:.64rem;font-family:'DM Mono',monospace;color:var(--muted);
+  padding:10px 14px 4px;letter-spacing:.12em;text-transform:uppercase}
+.nav-btn{
+  display:flex;align-items:center;gap:10px;padding:9px 14px;
+  border-radius:10px;border:none;background:transparent;color:var(--muted);
+  cursor:pointer;font-size:.86rem;font-family:'Nunito',sans-serif;font-weight:500;
+  transition:.15s;width:100%;text-align:left;position:relative;
+}
+.nav-btn .ico{font-size:.95rem;width:18px;text-align:center}
+.nav-btn:hover{background:var(--surface2);color:var(--text)}
+.nav-btn.active{background:rgba(244,114,182,.12);color:var(--rose)}
+.nav-btn.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--rose);border-radius:99px}
+.nav-btn .badge{
+  margin-left:auto;font-size:.66rem;font-family:'DM Mono',monospace;
+  background:var(--danger);color:#fff;border-radius:99px;
+  padding:1px 7px;min-width:20px;text-align:center;
+}
+.session-box{
+  margin-top:auto;background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;
+}
+.session-box .su{font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.08em}
+.session-box .sn{font-size:.9rem;font-weight:600;margin-top:3px}
+.session-box .sr{font-size:.7rem;font-family:'DM Mono',monospace;margin-top:2px}
 
-  /* STATS */
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
-  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
-  .stat-card .num{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:700}
-  .stat-card .lbl{font-size:.76rem;color:var(--muted);margin-top:2px}
-  .stat-card.warn-card{border-color:rgba(240,144,64,.35)}.stat-card.warn-card .num{color:var(--warn)}
-  .stat-card.danger-card{border-color:rgba(240,80,80,.35)}.stat-card.danger-card .num{color:var(--danger)}
-  .stat-card.value-card{border-color:rgba(74,240,160,.25)}.stat-card.value-card .num{color:var(--accent2)}
+/* MAIN */
+main{padding:24px 28px;overflow-y:auto;background:transparent}
+.page{display:none}
+.page.active{display:block;animation:fadeUp .24s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-  /* TABLE */
-  .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-  .table-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
-  .table-head h3{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:600}
-  .search-box{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 11px}
-  .search-box input{background:none;border:none;outline:none;color:var(--text);font-size:.83rem;width:170px}
-  table{width:100%;border-collapse:collapse}
-  thead th{font-family:'DM Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;
-    color:var(--muted);padding:9px 18px;text-align:left;border-bottom:1px solid var(--border);font-weight:500}
-  tbody tr{border-bottom:1px solid rgba(42,48,80,.4);transition:.12s}
-  tbody tr:last-child{border:none}
-  tbody tr:hover{background:var(--surface2)}
-  td{padding:11px 18px;font-size:.86rem}
-  .prod-name{font-weight:500}
-  .prod-cat{font-size:.72rem;color:var(--muted);margin-top:1px;font-family:'DM Mono',monospace}
-  .price-cell{font-family:'DM Mono',monospace;color:var(--accent2)}
-  .stock-bar-wrap{display:flex;align-items:center;gap:8px}
-  .stock-bar{height:4px;border-radius:99px;background:var(--border);flex:1;min-width:50px}
-  .stock-fill{height:100%;border-radius:99px;transition:.4s}
-  .stock-num{font-family:'DM Mono',monospace;font-size:.83rem;min-width:28px}
-  .status-pill{font-size:.68rem;font-family:'DM Mono',monospace;padding:3px 9px;border-radius:99px;font-weight:500}
-  .ok{background:rgba(74,240,160,.1);color:var(--accent2)}
-  .low{background:rgba(240,144,64,.13);color:var(--warn)}
-  .critical{background:rgba(240,80,80,.13);color:var(--danger)}
-  .actions{display:flex;gap:5px;align-items:center}
-  .btn-ico{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);
-    background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;
-    font-size:.85rem;transition:.15s;color:var(--text)}
-  .btn-ico:hover{border-color:var(--accent);color:var(--accent);background:rgba(240,192,64,.07)}
-  .btn-ico.danger:hover{border-color:var(--danger);color:var(--danger);background:rgba(240,80,80,.07)}
-  .btn-sell{font-size:.73rem;padding:4px 11px;border-radius:6px;
-    border:1px solid rgba(74,240,160,.3);background:rgba(74,240,160,.07);
-    color:var(--accent2);cursor:pointer;font-family:'DM Mono',monospace;transition:.15s}
-  .btn-sell:hover{background:rgba(74,240,160,.16)}
+.page-header{margin-bottom:22px}
+.page-header h2{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700}
+.page-header p{color:var(--muted);font-size:.84rem;margin-top:4px}
 
-  /* LOADING */
-  .loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--muted);gap:10px;font-family:'DM Mono',monospace;font-size:.84rem}
-  .spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
+/* ── DASHBOARD ── */
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px 20px;position:relative;overflow:hidden;transition:.2s;
+}
+.stat:hover{border-color:var(--border);transform:translateY(-1px)}
+.stat::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;
+  border-radius:50%;opacity:.06;}
+.stat.s-rose::after{background:var(--rose)}
+.stat.s-gold::after{background:var(--gold)}
+.stat.s-warn::after{background:var(--warn)}
+.stat.s-danger::after{background:var(--danger)}
+.stat .ico{font-size:1.3rem;margin-bottom:8px}
+.stat .val{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;line-height:1}
+.stat .lbl{font-size:.74rem;color:var(--muted);margin-top:5px}
+.stat.s-rose .val{color:var(--rose)}
+.stat.s-gold .val{color:var(--gold)}
+.stat.s-warn .val{color:var(--warn)}
+.stat.s-danger .val{color:var(--danger)}
 
-  /* FORM */
-  .form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px;max-width:620px}
-  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .form-group{display:flex;flex-direction:column;gap:5px}
-  .form-group.full{grid-column:1/-1}
-  label{font-size:.74rem;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:.04em}
-  input,select{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:9px 12px;
-    color:var(--text);font-size:.88rem;font-family:'DM Sans',sans-serif;outline:none;transition:.15s;width:100%}
-  input:focus,select:focus{border-color:var(--accent)}
-  select option{background:var(--surface)}
-  .btn-primary{background:var(--accent);color:#111;font-family:'Syne',sans-serif;font-weight:700;
-    font-size:.9rem;padding:11px 26px;border:none;border-radius:7px;cursor:pointer;transition:.15s;margin-top:8px;
-    display:inline-flex;align-items:center;gap:8px}
-  .btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
-  .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.dash-grid.single{grid-template-columns:1fr}
 
-  /* ALERTS */
-  .alert-list{display:flex;flex-direction:column;gap:8px}
-  .alert-item{display:flex;align-items:center;gap:14px;background:var(--surface);
-    border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px}
-  .alert-item.warn{border-left:3px solid var(--warn)}
-  .alert-item.crit{border-left:3px solid var(--danger);background:rgba(240,80,80,.04)}
-  .alert-ico{font-size:1.25rem}
-  .alert-body{flex:1}
-  .alert-title{font-weight:500;font-size:.9rem}
-  .alert-desc{font-size:.78rem;color:var(--muted);margin-top:2px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.card-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-bottom:1px solid var(--border);
+}
+.card-head h3{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:600}
+.card-body{padding:14px 18px}
 
-  /* LOG */
-  .log-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(42,48,80,.4)}
-  .log-item:last-child{border:none}
-  .log-dot{width:7px;height:7px;border-radius:50%;margin-top:6px;flex-shrink:0}
-  .log-text{font-size:.84rem}
-  .log-meta{font-size:.72rem;color:var(--muted);margin-top:1px;font-family:'DM Mono',monospace}
+/* Ventas recientes en dashboard */
+.venta-row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 0;border-bottom:1px solid rgba(46,42,58,.6);
+}
+.venta-row:last-child{border:none}
+.venta-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.venta-info{flex:1}
+.venta-prod{font-size:.86rem;font-weight:600}
+.venta-meta{font-size:.73rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:1px}
+.venta-monto{font-family:'DM Mono',monospace;font-size:.9rem;color:var(--mint);font-weight:500}
 
-  /* MODAL */
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;align-items:center;justify-content:center}
-  .modal-overlay.open{display:flex}
-  .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;
-    padding:26px;width:90%;max-width:440px;animation:fadeIn .2s ease}
-  .modal h3{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:16px}
-  .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
-  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);
-    padding:8px 18px;border-radius:7px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s}
-  .btn-ghost:hover{border-color:var(--muted)}
+/* Top productos */
+.top-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(46,42,58,.5)}
+.top-item:last-child{border:none}
+.top-rank{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);width:18px}
+.top-name{flex:1;font-size:.84rem;font-weight:500}
+.top-bar-wrap{width:80px}
+.top-bar{height:4px;background:var(--border);border-radius:99px}
+.top-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--rose),var(--lavender));transition:.5s}
+.top-qty{font-family:'DM Mono',monospace;font-size:.75rem;color:var(--rose);width:36px;text-align:right}
 
-  /* TOAST */
-  #toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--surface);
-    border:1px solid var(--border);border-radius:9px;padding:12px 18px;font-size:.86rem;
-    display:none;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:300px}
-  #toast.show{display:block;animation:fadeIn .25s ease}
+/* Chart area */
+.chart-wrap{padding:16px 18px}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:100px}
+.chart-bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--rose),rgba(244,114,182,.3));min-height:4px;transition:.6s}
+.chart-lbl{font-size:.62rem;color:var(--muted);font-family:'DM Mono',monospace}
+.chart-val{font-size:.65rem;color:var(--rose);font-family:'DM Mono',monospace}
 
-  /* EMPTY */
-  .empty{padding:32px;text-align:center;color:var(--muted);font-size:.86rem}
+/* ── INVENTARIO ── */
+.inv-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+.search-box{display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px}
+.search-box input{background:none;border:none;outline:none;color:var(--text);font-size:.83rem;width:160px;font-family:'Nunito',sans-serif}
+.filter-tabs{display:flex;gap:5px}
+.ftab{
+  font-size:.72rem;padding:4px 10px;border-radius:99px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);cursor:pointer;transition:.15s;font-family:'DM Mono',monospace;
+}
+.ftab.active{background:rgba(244,114,182,.12);border-color:rgba(244,114,182,.3);color:var(--rose)}
+.ftab:hover:not(.active){border-color:var(--muted)}
 
-  @media(max-width:860px){
-    .app{grid-template-columns:1fr}
-    aside{display:none}
-    .stats{grid-template-columns:1fr 1fr}
-    header{flex-wrap:wrap;gap:8px}
-  }
+table{width:100%;border-collapse:collapse}
+thead th{
+  font-family:'DM Mono',monospace;font-size:.68rem;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--muted);padding:9px 16px;text-align:left;
+  border-bottom:1px solid var(--border);font-weight:500;
+}
+tbody tr{border-bottom:1px solid rgba(46,42,58,.4);transition:.12s}
+tbody tr:last-child{border:none}
+tbody tr:hover{background:rgba(244,114,182,.03)}
+td{padding:11px 16px;font-size:.85rem}
+.prod-name{font-weight:600}
+.prod-cat{font-size:.7rem;color:var(--muted);margin-top:1px;font-family:'DM Mono',monospace}
+.price-cell{font-family:'DM Mono',monospace;color:var(--mint);font-size:.88rem}
+.stock-bar-wrap{display:flex;align-items:center;gap:8px}
+.stock-bar{height:4px;border-radius:99px;background:var(--border);flex:1;min-width:50px}
+.stock-fill{height:100%;border-radius:99px;transition:.5s}
+.stock-num{font-family:'DM Mono',monospace;font-size:.82rem;min-width:26px}
+.pill{font-size:.67rem;font-family:'DM Mono',monospace;padding:3px 9px;border-radius:99px;font-weight:500}
+.ok{background:rgba(74,240,176,.1);color:var(--mint)}
+.low{background:rgba(251,146,60,.13);color:var(--warn)}
+.critical{background:rgba(248,113,113,.13);color:var(--danger)}
+.actions{display:flex;gap:4px;align-items:center}
+.btn-ico{
+  width:28px;height:28px;border-radius:7px;border:1px solid var(--border);
+  background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:.82rem;transition:.15s;color:var(--text);
+}
+.btn-ico:hover{border-color:var(--rose);color:var(--rose);background:rgba(244,114,182,.08)}
+.btn-ico.del:hover{border-color:var(--danger);color:var(--danger);background:rgba(248,113,113,.08)}
+.btn-sell{
+  font-size:.72rem;padding:4px 12px;border-radius:7px;
+  border:1px solid rgba(244,114,182,.3);background:rgba(244,114,182,.08);
+  color:var(--rose);cursor:pointer;font-family:'DM Mono',monospace;transition:.15s;font-weight:500;
+}
+.btn-sell:hover{background:rgba(244,114,182,.18);border-color:var(--rose)}
+
+/* ── VENTAS PAGE ── */
+.ventas-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.vstat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.vstat .vval{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--rose)}
+.vstat .vlbl{font-size:.74rem;color:var(--muted);margin-top:4px}
+
+.ventas-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+
+/* ── FORM ── */
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px;max-width:620px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+label{font-size:.72rem;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:.05em}
+input,select,textarea{
+  background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  padding:9px 13px;color:var(--text);font-size:.88rem;font-family:'Nunito',sans-serif;
+  outline:none;transition:.15s;width:100%;
+}
+input:focus,select:focus{border-color:var(--rose);box-shadow:0 0 0 3px rgba(244,114,182,.08)}
+select option{background:var(--surface2)}
+.btn-primary{
+  background:linear-gradient(135deg,var(--rose),var(--lavender));color:#fff;
+  font-family:'Nunito',sans-serif;font-weight:700;font-size:.9rem;
+  padding:11px 26px;border:none;border-radius:9px;cursor:pointer;
+  transition:.15s;margin-top:8px;display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 6px 20px rgba(244,114,182,.3)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ── ALERTAS ── */
+.alert-list{display:flex;flex-direction:column;gap:8px}
+.alert-item{
+  display:flex;align-items:center;gap:14px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 18px;transition:.15s;
+}
+.alert-item:hover{border-color:var(--border);background:var(--surface2)}
+.alert-item.warn{border-left:3px solid var(--warn)}
+.alert-item.crit{border-left:3px solid var(--danger);background:rgba(248,113,113,.03)}
+.alert-ico{font-size:1.3rem}
+.alert-body{flex:1}
+.alert-title{font-weight:600;font-size:.9rem}
+.alert-desc{font-size:.77rem;color:var(--muted);margin-top:2px}
+
+/* ── MODALS ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:26px;width:92%;max-width:460px;animation:fadeUp .22s ease;
+  box-shadow:0 24px 60px rgba(0,0,0,.5);
+}
+.modal h3{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;margin-bottom:16px}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);
+  padding:8px 18px;border-radius:8px;cursor:pointer;font-family:'Nunito',sans-serif;transition:.15s;font-size:.88rem}
+.btn-ghost:hover{border-color:var(--muted)}
+.modal-product-card{
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:12px 16px;margin-bottom:16px;
+}
+.modal-product-card .mpn{font-weight:700;font-size:.95rem}
+.modal-product-card .mpm{font-size:.78rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:4px;display:flex;gap:16px}
+.modal-product-card .mpm span{color:var(--text)}
+.total-preview{
+  background:rgba(244,114,182,.08);border:1px solid rgba(244,114,182,.2);
+  border-radius:8px;padding:10px 14px;margin-top:12px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.total-preview .tlbl{font-size:.76rem;color:var(--muted)}
+.total-preview .tval{font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--rose)}
+
+/* ── LOADING & EMPTY ── */
+.loading{display:flex;align-items:center;justify-content:center;padding:36px;color:var(--muted);gap:10px;font-family:'DM Mono',monospace;font-size:.82rem}
+.spin{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--rose);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{padding:36px;text-align:center;color:var(--muted);font-size:.86rem}
+.empty .eico{font-size:2rem;margin-bottom:10px}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:12px 18px;font-size:.86rem;
+  display:none;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:300px;
+  font-family:'Nunito',sans-serif;
+}
+#toast.show{display:flex;align-items:center;gap:8px;animation:fadeUp .25s ease}
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  aside{display:none}
+  .dash-stats{grid-template-columns:1fr 1fr}
+  .dash-grid{grid-template-columns:1fr}
+  .ventas-stats{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<!-- BANNER CONFIGURACIÓN -->
+<!-- CONFIG BANNER -->
 <div id="config-banner">
-  <span>🔗</span>
-  <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.78rem">URL del Web App:</span>
-  <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/TU_ID_AQUÍ/exec">
-  <button class="btn-config" onclick="saveApiUrl()">Conectar</button>
-  <span class="config-ok" id="conn-status"></span>
+  <span class="lbl">🔗 Google Sheets URL:</span>
+  <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/TU_ID/exec">
+  <button class="btn-connect" onclick="saveApiUrl()">Conectar</button>
+  <span id="conn-status"></span>
 </div>
 
 <header>
-  <div class="brand">Stock<span>Control</span></div>
+  <div class="brand">
+    <span class="brand-icon">💄</span>
+    <span class="brand-text">Glamour<span>Stock</span></span>
+  </div>
   <div class="header-right">
-    <span class="sync-info" id="sync-time">Sin sincronizar</span>
+    <span class="sync-badge" id="sync-time">Sin sincronizar</span>
     <button class="btn-refresh" onclick="loadAll()">⟳ Actualizar</button>
     <div class="user-tabs">
       <button class="user-tab active" onclick="switchUser(0)">👤 Admin</button>
@@ -229,113 +356,200 @@
 
 <div class="app">
   <aside>
-    <div class="nav-label">Menú</div>
+    <div class="nav-section">Principal</div>
     <button class="nav-btn active" onclick="showPage('dashboard')"><span class="ico">📊</span> Dashboard</button>
     <button class="nav-btn" onclick="showPage('inventario')"><span class="ico">📦</span> Inventario</button>
-    <button class="nav-btn" id="nav-agregar" onclick="showPage('agregar')"><span class="ico">➕</span> Agregar Producto</button>
+    <button class="nav-btn" onclick="showPage('ventas')"><span class="ico">💰</span> Ventas</button>
+
+    <div class="nav-section">Gestión</div>
+    <button class="nav-btn" id="nav-agregar" onclick="showPage('agregar')"><span class="ico">✨</span> Agregar Producto</button>
     <button class="nav-btn" onclick="showPage('alertas')">
       <span class="ico">🔔</span> Alertas
       <span class="badge" id="badge-alertas">0</span>
     </button>
     <button class="nav-btn" onclick="showPage('actividad')"><span class="ico">📋</span> Actividad</button>
-    <div style="margin-top:auto">
-      <div class="session-box">
-        <div class="slbl">SESIÓN ACTUAL</div>
-        <div class="sval" id="sess-name">Admin</div>
-        <div class="srole" id="sess-role">● ADMINISTRADOR</div>
-      </div>
+
+    <div class="session-box">
+      <div class="su">SESIÓN ACTIVA</div>
+      <div class="sn" id="sess-name">Admin</div>
+      <div class="sr" id="sess-role" style="color:var(--rose)">● ADMINISTRADOR</div>
     </div>
   </aside>
 
   <main>
-    <!-- DASHBOARD -->
+
+    <!-- ══ DASHBOARD ══ -->
     <div class="page active" id="page-dashboard">
-      <h2>Dashboard</h2>
-      <p class="subtitle">Resumen en tiempo real · datos desde Google Sheets</p>
-      <div class="stats" id="stats-grid">
-        <div class="stat-card"><div class="num">—</div><div class="lbl">Total Productos</div></div>
-        <div class="stat-card value-card"><div class="num">—</div><div class="lbl">Valor en Stock</div></div>
-        <div class="stat-card warn-card"><div class="num">—</div><div class="lbl">Con Alertas</div></div>
-        <div class="stat-card danger-card"><div class="num">—</div><div class="lbl">Stock Crítico</div></div>
+      <div class="page-header">
+        <h2>Dashboard</h2>
+        <p>Resumen en tiempo real · datos desde Google Sheets</p>
       </div>
-      <div class="table-wrap">
-        <div class="table-head"><h3>Productos Críticos</h3></div>
-        <div id="critical-list" class="loading"><div class="spin"></div> Cargando...</div>
-      </div>
-    </div>
 
-    <!-- INVENTARIO -->
-    <div class="page" id="page-inventario">
-      <h2>Inventario</h2>
-      <p class="subtitle">Todos los productos registrados en Google Sheets</p>
-      <div class="table-wrap">
-        <div class="table-head">
-          <h3>Productos</h3>
-          <div class="search-box">🔍 <input type="text" id="search-input" placeholder="Buscar..." oninput="renderInventario()"></div>
+      <div class="dash-stats" id="dash-stats">
+        <div class="stat s-rose"><div class="ico">📦</div><div class="val">—</div><div class="lbl">Total Productos</div></div>
+        <div class="stat s-gold"><div class="ico">💵</div><div class="val">—</div><div class="lbl">Ventas Hoy</div></div>
+        <div class="stat s-warn"><div class="ico">⚠️</div><div class="val">—</div><div class="lbl">Alertas Stock</div></div>
+        <div class="stat s-danger"><div class="ico">🚨</div><div class="val">—</div><div class="lbl">Stock Crítico</div></div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Ventas recientes -->
+        <div class="card">
+          <div class="card-head"><h3>💸 Ventas Recientes</h3><span style="font-size:.72rem;color:var(--muted);font-family:'DM Mono',monospace" id="dash-total-ventas"></span></div>
+          <div class="card-body" id="dash-ventas-list"><div class="loading"><div class="spin"></div>Cargando...</div></div>
         </div>
-        <div id="inv-container" class="loading"><div class="spin"></div> Cargando...</div>
+        <!-- Top productos más vendidos -->
+        <div class="card">
+          <div class="card-head"><h3>🏆 Más Vendidos</h3></div>
+          <div class="card-body" id="dash-top-list"><div class="loading"><div class="spin"></div>Cargando...</div></div>
+        </div>
+      </div>
+
+      <div class="dash-grid single">
+        <!-- Ventas por día (últimos 7 días) -->
+        <div class="card">
+          <div class="card-head"><h3>📈 Ventas Últimos 7 Días</h3><span style="font-size:.72rem;color:var(--muted);font-family:'DM Mono',monospace" id="dash-semana-total"></span></div>
+          <div class="chart-wrap" id="dash-chart"><div class="loading"><div class="spin"></div>Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- Stock crítico -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-head"><h3>🚨 Stock Crítico</h3></div>
+        <div class="card-body" id="dash-critical"><div class="loading"><div class="spin"></div>Cargando...</div></div>
       </div>
     </div>
 
-    <!-- AGREGAR -->
+    <!-- ══ INVENTARIO ══ -->
+    <div class="page" id="page-inventario">
+      <div class="page-header">
+        <h2>Inventario</h2>
+        <p>Todos los productos · haz clic en Vender para registrar una venta</p>
+      </div>
+      <div class="card">
+        <div class="inv-toolbar">
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="search-box">🔍 <input type="text" id="search-input" placeholder="Buscar producto..." oninput="renderInventario()"></div>
+          </div>
+          <div class="filter-tabs">
+            <button class="ftab active" onclick="setFilter('todos',this)">Todos</button>
+            <button class="ftab" onclick="setFilter('ok',this)">✅ Ok</button>
+            <button class="ftab" onclick="setFilter('low',this)">⚠️ Bajo</button>
+            <button class="ftab" onclick="setFilter('critical',this)">🚨 Crítico</button>
+          </div>
+        </div>
+        <div id="inv-container"><div class="loading"><div class="spin"></div>Cargando inventario...</div></div>
+      </div>
+    </div>
+
+    <!-- ══ VENTAS ══ -->
+    <div class="page" id="page-ventas">
+      <div class="page-header">
+        <h2>Registro de Ventas</h2>
+        <p>Historial completo de todas las ventas registradas</p>
+      </div>
+      <div class="ventas-stats" id="ventas-stats">
+        <div class="vstat"><div class="vval">—</div><div class="vlbl">Ventas Hoy</div></div>
+        <div class="vstat"><div class="vval" style="color:var(--lavender)">—</div><div class="vlbl">Ventas Esta Semana</div></div>
+        <div class="vstat"><div class="vval" style="color:var(--gold)">—</div><div class="vlbl">Total Ingresos (mes)</div></div>
+      </div>
+      <div class="ventas-table-wrap">
+        <div class="inv-toolbar">
+          <h3 style="font-family:'Playfair Display',serif;font-size:.95rem">Todas las Ventas</h3>
+          <div class="search-box">🔍 <input type="text" id="venta-search" placeholder="Buscar venta..." oninput="renderVentasPage()"></div>
+        </div>
+        <div id="ventas-container"><div class="loading"><div class="spin"></div>Cargando ventas...</div></div>
+      </div>
+    </div>
+
+    <!-- ══ AGREGAR ══ -->
     <div class="page" id="page-agregar">
-      <h2>Agregar Producto</h2>
-      <p class="subtitle">El producto se guardará directamente en Google Sheets</p>
+      <div class="page-header">
+        <h2>Agregar Producto</h2>
+        <p>El producto se guardará directamente en Google Sheets</p>
+      </div>
       <div class="form-card">
         <div class="form-grid">
-          <div class="form-group full"><label>NOMBRE DEL PRODUCTO</label><input type="text" id="f-nombre" placeholder="Ej: Cemento Portland 50kg"></div>
+          <div class="form-group full"><label>NOMBRE DEL PRODUCTO</label><input type="text" id="f-nombre" placeholder="Ej: Labial Matte Nº24"></div>
           <div class="form-group"><label>CATEGORÍA</label>
             <select id="f-cat">
-              <option>General</option><option>Maquillaje</option><option>Skincare</option>
-              <option>Cuidado del Cabello</option><option>Fragancias</option><option>Herramientas y accesorios</option><option>Herramientas</option>
+              <option>Maquillaje</option><option>Skincare</option><option>Cabello</option>
+              <option>Uñas</option><option>Perfumería</option><option>Cuerpo</option>
+              <option>Herramientas de Belleza</option><option>Accesorios</option>
             </select>
           </div>
-          <div class="form-group"><label>PRECIO UNITARIO ($)</label><input type="number" id="f-precio" placeholder="0.00" min="0" step="0.01"></div>
+          <div class="form-group"><label>PRECIO VENTA ($)</label><input type="number" id="f-precio" placeholder="0.00" min="0" step="0.01"></div>
+          <div class="form-group"><label>PRECIO COSTO ($)</label><input type="number" id="f-costo" placeholder="0.00" min="0" step="0.01"></div>
           <div class="form-group"><label>CANTIDAD EN STOCK</label><input type="number" id="f-stock" placeholder="0" min="0"></div>
-          <div class="form-group"><label>ALERTA MÍNIMA (BAJO)</label><input type="number" id="f-minlow" placeholder="20" min="0"></div>
-          <div class="form-group"><label>ALERTA CRÍTICA (URGENTE)</label><input type="number" id="f-mincrit" placeholder="10" min="0"></div>
-          <div class="form-group full"><label>UNIDAD DE MEDIDA</label>
+          <div class="form-group"><label>UNIDAD</label>
             <select id="f-unidad">
-              <option value="unidades">Unidades</option><option value="ml">Mililitros (ml)</option>
-              <option value="oz">Onzas (oz)</option><option value="blister">Blíster</option>
-              <option value="sets">Sets</option><option value="gr">Gramos (gr)</option><option value="cajas">Cajas</option>
+              <option value="unidades">Unidades</option><option value="ml">ml</option>
+              <option value="oz">oz</option><option value="gr">gr</option>
+              <option value="cajas">Cajas</option><option value="sets">Sets</option>
+              <option value="blister">Blíster</option>
             </select>
           </div>
+          <div class="form-group"><label>ALERTA STOCK BAJO</label><input type="number" id="f-minlow" placeholder="15" min="0"></div>
+          <div class="form-group"><label>ALERTA STOCK CRÍTICO</label><input type="number" id="f-mincrit" placeholder="5" min="0"></div>
+          <div class="form-group full"><label>MARCA / REFERENCIA (opcional)</label><input type="text" id="f-marca" placeholder="Ej: MAC, NYX, L'Oréal..."></div>
         </div>
-        <button class="btn-primary" id="btn-agregar" onclick="agregarProducto()">➕ Registrar Producto</button>
+        <button class="btn-primary" id="btn-agregar" onclick="agregarProducto()">✨ Registrar Producto</button>
       </div>
     </div>
 
-    <!-- ALERTAS -->
+    <!-- ══ ALERTAS ══ -->
     <div class="page" id="page-alertas">
-      <h2>🔔 Alertas de Stock</h2>
-      <p class="subtitle">Productos que requieren reposición</p>
-      <div class="alert-list" id="alert-list"><div class="loading"><div class="spin"></div> Cargando...</div></div>
+      <div class="page-header">
+        <h2>🔔 Alertas de Stock</h2>
+        <p>Productos que requieren reposición</p>
+      </div>
+      <div class="alert-list" id="alert-list"><div class="loading"><div class="spin"></div>Cargando...</div></div>
     </div>
 
-    <!-- ACTIVIDAD -->
+    <!-- ══ ACTIVIDAD ══ -->
     <div class="page" id="page-actividad">
-      <h2>Registro de Actividad</h2>
-      <p class="subtitle">Historial guardado en Google Sheets · visible para todos los usuarios</p>
-      <div class="table-wrap">
-        <div style="padding:6px 18px 0" id="activity-log"><div class="loading"><div class="spin"></div> Cargando...</div></div>
+      <div class="page-header">
+        <h2>Registro de Actividad</h2>
+        <p>Historial completo guardado en Google Sheets</p>
+      </div>
+      <div class="card">
+        <div style="padding:6px 18px 0" id="activity-log"><div class="loading"><div class="spin"></div>Cargando...</div></div>
       </div>
     </div>
+
   </main>
 </div>
 
 <!-- MODAL VENDER -->
 <div class="modal-overlay" id="modal-sell">
   <div class="modal">
-    <h3>💸 Registrar Venta</h3>
-    <div id="sell-info" style="margin-bottom:14px;font-size:.86rem;color:var(--muted)"></div>
-    <div class="form-group">
-      <label>CANTIDAD A VENDER</label>
-      <input type="number" id="sell-qty" min="1" placeholder="1">
+    <h3>💄 Registrar Venta</h3>
+    <div class="modal-product-card" id="sell-product-card"></div>
+    <div class="form-grid" style="gap:12px">
+      <div class="form-group">
+        <label>CANTIDAD</label>
+        <input type="number" id="sell-qty" min="1" placeholder="1" oninput="updateTotal()">
+      </div>
+      <div class="form-group">
+        <label>PRECIO UNITARIO ($)</label>
+        <input type="number" id="sell-price" min="0" step="0.01" oninput="updateTotal()">
+      </div>
+      <div class="form-group full">
+        <label>CLIENTE (opcional)</label>
+        <input type="text" id="sell-client" placeholder="Nombre del cliente">
+      </div>
+      <div class="form-group full">
+        <label>NOTA (opcional)</label>
+        <input type="text" id="sell-note" placeholder="Descuento, promoción...">
+      </div>
+    </div>
+    <div class="total-preview">
+      <span class="tlbl">TOTAL DE VENTA</span>
+      <span class="tval" id="sell-total">$0.00</span>
     </div>
     <div class="modal-btns">
       <button class="btn-ghost" onclick="closeModal('modal-sell')">Cancelar</button>
-      <button class="btn-primary" id="btn-sell-confirm" onclick="confirmarVenta()">Confirmar</button>
+      <button class="btn-primary" id="btn-sell-confirm" onclick="confirmarVenta()" style="margin-top:0">Confirmar Venta</button>
     </div>
   </div>
 </div>
@@ -346,14 +560,22 @@
     <h3>✏️ Editar Producto</h3>
     <div class="form-group" style="margin-bottom:12px"><label>NOMBRE</label><input type="text" id="edit-nombre"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-group"><label>PRECIO ($)</label><input type="number" id="edit-precio" step="0.01"></div>
-      <div class="form-group"><label>STOCK</label><input type="number" id="edit-stock" min="0"></div>
+      <div class="form-group"><label>PRECIO VENTA ($)</label><input type="number" id="edit-precio" step="0.01"></div>
+      <div class="form-group"><label>PRECIO COSTO ($)</label><input type="number" id="edit-costo" step="0.01"></div>
+      <div class="form-group"><label>STOCK ACTUAL</label><input type="number" id="edit-stock" min="0"></div>
+      <div class="form-group"><label>UNIDAD</label>
+        <select id="edit-unidad">
+          <option value="unidades">Unidades</option><option value="ml">ml</option>
+          <option value="oz">oz</option><option value="gr">gr</option>
+          <option value="cajas">Cajas</option><option value="sets">Sets</option>
+        </select>
+      </div>
       <div class="form-group"><label>MÍN BAJO</label><input type="number" id="edit-low" min="0"></div>
       <div class="form-group"><label>MÍN CRÍTICO</label><input type="number" id="edit-crit" min="0"></div>
     </div>
     <div class="modal-btns">
       <button class="btn-ghost" onclick="closeModal('modal-edit')">Cancelar</button>
-      <button class="btn-primary" id="btn-edit-confirm" onclick="guardarEdicion()">Guardar</button>
+      <button class="btn-primary" id="btn-edit-confirm" onclick="guardarEdicion()" style="margin-top:0">Guardar Cambios</button>
     </div>
   </div>
 </div>
@@ -361,25 +583,31 @@
 <div id="toast"></div>
 
 <script>
-// ── CONFIG ──
+// ══════════════════════════════════════════
+//  ESTADO
+// ══════════════════════════════════════════
 const USERS = ['Admin','Usuario 2','Usuario 3','Usuario 4'];
 let currentUser = 0;
-let API_URL = localStorage.getItem('stockcontrol_api') || '';
+let API_URL = localStorage.getItem('glamourstock_api') || '';
 let products = [];
+let ventas = [];
+let activityLogs = [];
 let sellTarget = null;
 let editTarget = null;
+let stockFilter = 'todos';
 
-// ── API URL ──
+// ══════════════════════════════════════════
+//  API
+// ══════════════════════════════════════════
 function saveApiUrl() {
   const url = document.getElementById('api-url-input').value.trim();
-  if (!url.startsWith('https://script.google.com')) { toast('URL inválida. Debe ser de script.google.com','err'); return; }
+  if (!url.startsWith('https://script.google.com')) { toast('URL inválida','err'); return; }
   API_URL = url;
-  localStorage.setItem('stockcontrol_api', url);
-  document.getElementById('conn-status').textContent = '✓ URL guardada';
+  localStorage.setItem('glamourstock_api', url);
+  document.getElementById('conn-status').textContent = '✓ Conectado';
   loadAll();
 }
 
-// ── API CALL ──
 async function api(params) {
   if (!API_URL) { toast('Configura la URL del Web App primero','err'); return null; }
   const url = API_URL + '?' + new URLSearchParams(params).toString();
@@ -389,64 +617,79 @@ async function api(params) {
     if (data.error) { toast('Error: '+data.error,'err'); return null; }
     return data;
   } catch(e) {
-    toast('Error de conexión con Google Sheets','err');
-    return null;
+    toast('Error de conexión','err'); return null;
   }
 }
 
-// ── LOAD ALL ──
 async function loadAll() {
   if (!API_URL) return;
-  const [pd, ad] = await Promise.all([
+  const [pd, vd, ad] = await Promise.all([
     api({action:'getProducts'}),
+    api({action:'getVentas'}),
     api({action:'getActivity'})
   ]);
-  if (pd) products = pd.products;
-  if (ad) renderActividad(ad.logs);
-  renderAll();
+  if (pd) products = pd.products || [];
+  if (vd) ventas   = vd.ventas   || [];
+  if (ad) activityLogs = ad.logs || [];
   document.getElementById('sync-time').textContent = 'Sync: '+new Date().toLocaleTimeString('es-EC');
+  renderAll();
 }
 
-// ── AUTO REFRESH cada 30s ──
-setInterval(() => { if(API_URL) loadAll(); }, 30000);
+// Auto-refresh cada 30s
+setInterval(()=>{ if(API_URL) loadAll(); }, 30000);
 
-// ── INIT API URL ──
 if (API_URL) {
   document.getElementById('api-url-input').value = API_URL;
-  document.getElementById('conn-status').textContent = '✓ URL cargada';
+  document.getElementById('conn-status').textContent = '✓ Conectado';
   loadAll();
 }
 
-// ── UTILIDADES ──
+// ══════════════════════════════════════════
+//  UTILIDADES
+// ══════════════════════════════════════════
 function getStatus(p) {
   if (p.stock <= p.minCrit) return 'critical';
   if (p.stock <= p.minLow)  return 'low';
   return 'ok';
 }
-function statusLabel(s) { return {ok:'Disponible',low:'Stock Bajo',critical:'Stock Crítico'}[s]; }
-function pct(p) { return Math.min(100, Math.round(p.stock / Math.max(p.minLow*3,1) * 100)); }
-function barColor(s) { return {ok:'#4af0a0',low:'#f09040',critical:'#f05050'}[s]; }
-function fmt(n) { return '$'+Number(n).toFixed(2); }
+function statusLabel(s) { return {ok:'Disponible',low:'Stock Bajo',critical:'Crítico'}[s]; }
+function pct(p) { return Math.min(100, Math.round(p.stock / Math.max(p.minLow*3,1)*100)); }
+function barColor(s) { return {ok:'#4af0b0',low:'#fb923c',critical:'#f87171'}[s]; }
+function fmt(n) { return '$'+Number(n||0).toFixed(2); }
+function fmtDate(str) {
+  if (!str) return '—';
+  try { return new Date(str).toLocaleDateString('es-EC',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); }
+  catch { return str; }
+}
+function today() { return new Date().toISOString().split('T')[0]; }
+function weekAgo() { const d=new Date(); d.setDate(d.getDate()-6); return d.toISOString().split('T')[0]; }
+function monthAgo() { const d=new Date(); d.setDate(d.getDate()-29); return d.toISOString().split('T')[0]; }
+
 function toast(msg, type='ok') {
   const t = document.getElementById('toast');
-  t.innerHTML = (type==='ok'?'✅':'⚠️')+' '+msg;
-  t.style.borderColor = type==='ok'?'var(--accent2)':'var(--danger)';
+  t.innerHTML = `<span>${type==='ok'?'✅':'⚠️'}</span><span>${msg}</span>`;
+  t.style.borderColor = type==='ok'?'rgba(74,240,176,.4)':'rgba(248,113,113,.4)';
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3500);
-}
-function setLoading(btn, loading) {
-  if (!btn) return;
-  btn.disabled = loading;
-  btn.innerHTML = loading ? '<div class="spin" style="width:14px;height:14px;border-width:2px"></div> Guardando...' : btn.dataset.orig;
+  setTimeout(()=>t.classList.remove('show'), 3500);
 }
 
-// ── NAVEGACIÓN ──
+function setLoading(btn, loading, orig) {
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? '<div class="spin" style="width:13px;height:13px;border-width:2px;border-top-color:#fff"></div> Guardando...'
+    : orig;
+}
+
+// ══════════════════════════════════════════
+//  NAVEGACIÓN
+// ══════════════════════════════════════════
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  const pages = ['dashboard','inventario','agregar','alertas','actividad'];
-  const idx = pages.indexOf(id);
+  const pages=['dashboard','inventario','ventas','agregar','alertas','actividad'];
+  const idx=pages.indexOf(id);
   document.querySelectorAll('.nav-btn')[idx]?.classList.add('active');
 }
 
@@ -454,162 +697,318 @@ function switchUser(i) {
   currentUser = i;
   document.querySelectorAll('.user-tab').forEach((t,j)=>t.classList.toggle('active',i===j));
   document.getElementById('sess-name').textContent = USERS[i];
-  document.getElementById('sess-role').textContent = i===0 ? '● ADMINISTRADOR' : '● VISUALIZADOR';
+  const isAdmin = i===0;
+  document.getElementById('sess-role').textContent = isAdmin?'● ADMINISTRADOR':'● VISUALIZADOR';
+  document.getElementById('sess-role').style.color = isAdmin?'var(--rose)':'var(--lavender)';
   const addBtn = document.getElementById('nav-agregar');
-  addBtn.style.opacity = i===0?'1':'.35';
-  addBtn.style.pointerEvents = i===0?'auto':'none';
+  addBtn.style.opacity = isAdmin?'1':'.35';
+  addBtn.style.pointerEvents = isAdmin?'auto':'none';
   renderAll();
 }
 
-// ── RENDER DASHBOARD ──
+function setFilter(f, btn) {
+  stockFilter = f;
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderInventario();
+}
+
+// ══════════════════════════════════════════
+//  RENDER DASHBOARD
+// ══════════════════════════════════════════
 function renderDashboard() {
-  const total = products.length;
-  const alerts = products.filter(p=>getStatus(p)!=='ok').length;
-  const criticos = products.filter(p=>getStatus(p)==='critical').length;
-  const valor = products.reduce((s,p)=>s+p.precio*p.stock,0);
+  const todayStr = today();
+  const ventasHoy = ventas.filter(v=>v.fecha && v.fecha.startsWith(todayStr));
+  const totalHoy  = ventasHoy.reduce((s,v)=>s+Number(v.total||0), 0);
+  const alertCount= products.filter(p=>getStatus(p)!=='ok').length;
+  const critCount = products.filter(p=>getStatus(p)==='critical').length;
 
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card"><div class="num">${total}</div><div class="lbl">Total Productos</div></div>
-    <div class="stat-card value-card"><div class="num">${fmt(valor)}</div><div class="lbl">Valor en Stock</div></div>
-    <div class="stat-card warn-card"><div class="num">${alerts}</div><div class="lbl">Con Alertas</div></div>
-    <div class="stat-card danger-card"><div class="num">${criticos}</div><div class="lbl">Stock Crítico</div></div>`;
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat s-rose"><div class="ico">📦</div><div class="val">${products.length}</div><div class="lbl">Total Productos</div></div>
+    <div class="stat s-gold"><div class="ico">💵</div><div class="val">${fmt(totalHoy)}</div><div class="lbl">Ventas Hoy</div></div>
+    <div class="stat s-warn"><div class="ico">⚠️</div><div class="val">${alertCount}</div><div class="lbl">Alertas Stock</div></div>
+    <div class="stat s-danger"><div class="ico">🚨</div><div class="val">${critCount}</div><div class="lbl">Stock Crítico</div></div>`;
 
-  const probs = products.filter(p=>getStatus(p)!=='ok').sort((a,b)=>a.stock-b.stock);
-  const cl = document.getElementById('critical-list');
-  if (!probs.length) { cl.innerHTML='<div class="empty">✅ Todos los productos tienen stock suficiente</div>'; return; }
-  cl.innerHTML = '<div style="padding:12px 18px;display:flex;flex-direction:column;gap:8px">'+probs.map(p=>{
+  // Ventas recientes (últimas 8)
+  const recent = [...ventas].slice(0,8);
+  const dvl = document.getElementById('dash-ventas-list');
+  const totalVentas = ventas.reduce((s,v)=>s+Number(v.total||0),0);
+  document.getElementById('dash-total-ventas').textContent = 'Total: '+fmt(totalVentas);
+
+  if (!recent.length) { dvl.innerHTML='<div class="empty"><div class="eico">🛍️</div>Aún no hay ventas registradas</div>'; }
+  else dvl.innerHTML = recent.map(v=>`
+    <div class="venta-row">
+      <div class="venta-dot" style="background:var(--rose)"></div>
+      <div class="venta-info">
+        <div class="venta-prod">${v.producto}</div>
+        <div class="venta-meta">${v.usuario||'—'} · ${fmtDate(v.fecha)} · ${v.cantidad} ${v.unidad||'u'} ${v.cliente?'· '+v.cliente:''}</div>
+      </div>
+      <div class="venta-monto">${fmt(v.total)}</div>
+    </div>`).join('');
+
+  // Top productos
+  const topMap = {};
+  ventas.forEach(v=>{
+    if (!topMap[v.producto]) topMap[v.producto]={qty:0,monto:0};
+    topMap[v.producto].qty   += Number(v.cantidad||0);
+    topMap[v.producto].monto += Number(v.total||0);
+  });
+  const top = Object.entries(topMap).sort((a,b)=>b[1].qty-a[1].qty).slice(0,6);
+  const maxQty = top[0]?.[1]?.qty || 1;
+  const dtl = document.getElementById('dash-top-list');
+  if (!top.length) { dtl.innerHTML='<div class="empty"><div class="eico">📊</div>Sin datos aún</div>'; }
+  else dtl.innerHTML = top.map(([name,d],i)=>`
+    <div class="top-item">
+      <span class="top-rank">#${i+1}</span>
+      <span class="top-name">${name}</span>
+      <div class="top-bar-wrap"><div class="top-bar"><div class="top-fill" style="width:${Math.round(d.qty/maxQty*100)}%"></div></div></div>
+      <span class="top-qty">${d.qty} u</span>
+    </div>`).join('');
+
+  // Gráfico 7 días
+  renderChart();
+
+  // Stock crítico
+  const criticos = products.filter(p=>getStatus(p)!=='ok').sort((a,b)=>a.stock-b.stock);
+  const dc = document.getElementById('dash-critical');
+  if (!criticos.length) dc.innerHTML='<div class="empty">✅ Todos los productos tienen stock suficiente</div>';
+  else dc.innerHTML = criticos.map(p=>{
     const s=getStatus(p);
-    return `<div class="alert-item ${s==='critical'?'crit':'warn'}">
+    return `<div class="alert-item ${s==='critical'?'crit':'warn'}" style="margin-bottom:6px">
       <span class="alert-ico">${s==='critical'?'🚨':'⚠️'}</span>
       <div class="alert-body"><div class="alert-title">${p.nombre}</div>
-      <div class="alert-desc">${p.cat} · Stock: <strong>${p.stock} ${p.unidad}</strong> · Mín. crítico: ${p.minCrit}</div></div>
-      <span class="status-pill ${s}">${statusLabel(s)}</span></div>`;
-  }).join('')+'</div>';
-}
-
-// ── RENDER INVENTARIO ──
-function renderInventario() {
-  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
-  const filtered = products.filter(p=>p.nombre.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q));
-  const isAdmin = currentUser===0;
-  const container = document.getElementById('inv-container');
-
-  if (!filtered.length) { container.innerHTML='<div class="empty">Sin productos que coincidan</div>'; return; }
-
-  container.innerHTML = `<table>
-    <thead><tr>
-      <th>Producto</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acción</th>
-    </tr></thead>
-    <tbody>
-    ${filtered.map(p=>{
-      const s=getStatus(p); const bar=pct(p);
-      return `<tr>
-        <td><div class="prod-name">${p.nombre}</div><div class="prod-cat">${p.cat} · ${p.unidad}</div></td>
-        <td class="price-cell">${fmt(p.precio)}</td>
-        <td><div class="stock-bar-wrap">
-          <div class="stock-bar"><div class="stock-fill" style="width:${bar}%;background:${barColor(s)}"></div></div>
-          <span class="stock-num">${p.stock}</span></div></td>
-        <td><span class="status-pill ${s}">${statusLabel(s)}</span></td>
-        <td><div class="actions">
-          <button class="btn-sell" onclick="openSell(${p.id})">Vender</button>
-          ${isAdmin?`<button class="btn-ico" onclick="openEdit(${p.id})" title="Editar">✏️</button>
-          <button class="btn-ico danger" onclick="eliminar(${p.id})" title="Eliminar">🗑️</button>`:''}
-        </div></td>
-      </tr>`;
-    }).join('')}
-    </tbody></table>`;
-}
-
-// ── RENDER ALERTAS ──
-function renderAlertas() {
-  const probs = products.filter(p=>getStatus(p)!=='ok');
-  document.getElementById('badge-alertas').textContent = probs.length;
-  const al = document.getElementById('alert-list');
-  if (!probs.length) { al.innerHTML='<div class="empty">✅ No hay alertas activas</div>'; return; }
-  al.innerHTML = probs.sort((a,b)=>a.stock-b.stock).map(p=>{
-    const s=getStatus(p);
-    return `<div class="alert-item ${s==='critical'?'crit':'warn'}">
-      <span class="alert-ico" style="font-size:1.4rem">${s==='critical'?'🚨':'⚠️'}</span>
-      <div class="alert-body"><div class="alert-title">${p.nombre}</div>
-      <div class="alert-desc">
-        ${s==='critical'?'<strong style="color:var(--danger)">URGENTE · Reposición inmediata</strong>':'Reabastecer pronto'}
-        · Quedan <strong>${p.stock} ${p.unidad}</strong> · Mín bajo: ${p.minLow} · Mín crítico: ${p.minCrit}
-      </div></div>
-      <span class="status-pill ${s}">${statusLabel(s)}</span>
+      <div class="alert-desc">${p.cat} · Stock: <strong>${p.stock} ${p.unidad}</strong> · Mín crítico: ${p.minCrit}</div></div>
+      <span class="pill ${s}">${statusLabel(s)}</span>
     </div>`;
   }).join('');
 }
 
-// ── RENDER ACTIVIDAD ──
-function renderActividad(logs) {
+function renderChart() {
+  const days = [];
+  for (let i=6;i>=0;i--) {
+    const d=new Date(); d.setDate(d.getDate()-i);
+    days.push(d.toISOString().split('T')[0]);
+  }
+  const dayLabels = days.map(d=>{
+    const dd=new Date(d+'T12:00:00');
+    return dd.toLocaleDateString('es-EC',{weekday:'short'}).slice(0,3);
+  });
+  const dayTotals = days.map(d=>
+    ventas.filter(v=>v.fecha&&v.fecha.startsWith(d)).reduce((s,v)=>s+Number(v.total||0),0)
+  );
+  const maxT = Math.max(...dayTotals,1);
+  const semanaTotal = dayTotals.reduce((a,b)=>a+b,0);
+  document.getElementById('dash-semana-total').textContent = 'Total 7 días: '+fmt(semanaTotal);
+
+  document.getElementById('dash-chart').innerHTML = `
+    <div class="chart-bars">
+      ${dayTotals.map((t,i)=>`
+        <div class="chart-bar-col">
+          <span class="chart-val">${t>0?fmt(t):''}</span>
+          <div class="chart-bar" style="height:${Math.max(4,Math.round(t/maxT*90))}px"></div>
+          <span class="chart-lbl">${dayLabels[i]}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+//  RENDER INVENTARIO
+// ══════════════════════════════════════════
+function renderInventario() {
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
+  let filtered = products.filter(p=>
+    p.nombre.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)
+  );
+  if (stockFilter!=='todos') filtered = filtered.filter(p=>getStatus(p)===stockFilter);
+  const isAdmin = currentUser===0;
+  const container = document.getElementById('inv-container');
+
+  if (!filtered.length) { container.innerHTML='<div class="empty"><div class="eico">🔍</div>Sin productos que coincidan</div>'; return; }
+
+  container.innerHTML=`<table>
+    <thead><tr>
+      <th>Producto</th><th>Precio</th><th>Costo</th><th>Stock</th><th>Estado</th><th>Acción</th>
+    </tr></thead>
+    <tbody>${filtered.map(p=>{
+      const s=getStatus(p);
+      return `<tr>
+        <td><div class="prod-name">${p.nombre}${p.marca?` <span style="color:var(--muted);font-size:.72rem;font-weight:400">${p.marca}</span>`:''}</div>
+            <div class="prod-cat">${p.cat} · ${p.unidad}</div></td>
+        <td class="price-cell">${fmt(p.precio)}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:.82rem;color:var(--muted)">${p.costo>0?fmt(p.costo):'—'}</td>
+        <td><div class="stock-bar-wrap">
+          <div class="stock-bar"><div class="stock-fill" style="width:${pct(p)}%;background:${barColor(s)}"></div></div>
+          <span class="stock-num">${p.stock}</span>
+        </div></td>
+        <td><span class="pill ${s}">${statusLabel(s)}</span></td>
+        <td><div class="actions">
+          <button class="btn-sell" onclick="openSell(${p.id})">💰 Vender</button>
+          ${isAdmin?`<button class="btn-ico" onclick="openEdit(${p.id})" title="Editar">✏️</button>
+          <button class="btn-ico del" onclick="eliminar(${p.id})" title="Eliminar">🗑️</button>`:''}
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+// ══════════════════════════════════════════
+//  RENDER VENTAS PAGE
+// ══════════════════════════════════════════
+function renderVentasPage() {
+  const q = (document.getElementById('venta-search')?.value||'').toLowerCase();
+  const filtered = ventas.filter(v=>
+    (v.producto||'').toLowerCase().includes(q)||(v.cliente||'').toLowerCase().includes(q)
+  );
+
+  // Stats
+  const todayStr=today(), weekStr=weekAgo(), monthStr=monthAgo();
+  const hoy = ventas.filter(v=>v.fecha&&v.fecha.startsWith(todayStr)).reduce((s,v)=>s+Number(v.total||0),0);
+  const semana = ventas.filter(v=>v.fecha&&v.fecha>=weekStr).reduce((s,v)=>s+Number(v.total||0),0);
+  const mes = ventas.filter(v=>v.fecha&&v.fecha>=monthStr).reduce((s,v)=>s+Number(v.total||0),0);
+
+  document.getElementById('ventas-stats').innerHTML=`
+    <div class="vstat"><div class="vval">${fmt(hoy)}</div><div class="vlbl">💰 Ventas Hoy</div></div>
+    <div class="vstat"><div class="vval" style="color:var(--lavender)">${fmt(semana)}</div><div class="vlbl">📅 Esta Semana (7 días)</div></div>
+    <div class="vstat"><div class="vval" style="color:var(--gold)">${fmt(mes)}</div><div class="vlbl">📆 Este Mes (30 días)</div></div>`;
+
+  const vc = document.getElementById('ventas-container');
+  if (!filtered.length) { vc.innerHTML='<div class="empty"><div class="eico">🛍️</div>No hay ventas registradas aún</div>'; return; }
+
+  vc.innerHTML=`<table>
+    <thead><tr>
+      <th>Fecha</th><th>Producto</th><th>Qty</th><th>Precio Unit.</th><th>Total</th><th>Cliente</th><th>Vendedor</th><th>Nota</th>
+    </tr></thead>
+    <tbody>${filtered.map(v=>`<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:.78rem;color:var(--muted)">${fmtDate(v.fecha)}</td>
+      <td><div class="prod-name" style="font-size:.84rem">${v.producto}</div><div class="prod-cat">${v.categoria||'—'}</div></td>
+      <td style="font-family:'DM Mono',monospace;font-size:.86rem">${v.cantidad} ${v.unidad||'u'}</td>
+      <td class="price-cell" style="font-size:.84rem">${fmt(v.precioUnit)}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--rose)">${fmt(v.total)}</td>
+      <td style="font-size:.82rem">${v.cliente||'—'}</td>
+      <td style="font-size:.78rem;color:var(--muted);font-family:'DM Mono',monospace">${v.usuario||'—'}</td>
+      <td style="font-size:.78rem;color:var(--muted)">${v.nota||'—'}</td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+// ══════════════════════════════════════════
+//  RENDER ALERTAS
+// ══════════════════════════════════════════
+function renderAlertas() {
+  const probs = products.filter(p=>getStatus(p)!=='ok');
+  document.getElementById('badge-alertas').textContent = probs.length;
+  const al = document.getElementById('alert-list');
+  if (!probs.length) { al.innerHTML='<div class="empty"><div class="eico">✅</div>No hay alertas activas. ¡Stock en buen nivel!</div>'; return; }
+  al.innerHTML=probs.sort((a,b)=>a.stock-b.stock).map(p=>{
+    const s=getStatus(p);
+    return `<div class="alert-item ${s==='critical'?'crit':'warn'}">
+      <span class="alert-ico">${s==='critical'?'🚨':'⚠️'}</span>
+      <div class="alert-body">
+        <div class="alert-title">${p.nombre} ${p.marca?`<span style="color:var(--muted);font-weight:400;font-size:.8rem">${p.marca}</span>`:''}</div>
+        <div class="alert-desc">
+          ${s==='critical'?'<strong style="color:var(--danger)">URGENTE · Reposición inmediata</strong>':'Reabastecer pronto'}
+          · Quedan <strong>${p.stock} ${p.unidad}</strong> · Mín: ${p.minLow} · Crítico: ${p.minCrit}
+        </div>
+      </div>
+      <span class="pill ${s}">${statusLabel(s)}</span>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  RENDER ACTIVIDAD
+// ══════════════════════════════════════════
+function renderActividad() {
   const container = document.getElementById('activity-log');
-  if (!logs || !logs.length) { container.innerHTML='<div class="empty">Sin actividad registrada aún</div>'; return; }
-  container.innerHTML = logs.map(a=>`
-    <div class="log-item">
-      <div class="log-dot" style="background:${a.color||'#4af0a0'}"></div>
-      <div><div class="log-text">${a.detail}</div>
-      <div class="log-meta">${a.user} · ${a.time}</div></div>
+  if (!activityLogs.length) { container.innerHTML='<div class="empty">Sin actividad registrada</div>'; return; }
+  container.innerHTML=activityLogs.map(a=>`
+    <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,42,58,.4)">
+      <div style="width:7px;height:7px;border-radius:50%;background:${a.color||'#f472b6'};margin-top:6px;flex-shrink:0"></div>
+      <div>
+        <div style="font-size:.84rem">${a.detail}</div>
+        <div style="font-size:.72rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:1px">${a.user} · ${a.time}</div>
+      </div>
     </div>`).join('');
 }
 
-// ── AGREGAR ──
+// ══════════════════════════════════════════
+//  AGREGAR PRODUCTO
+// ══════════════════════════════════════════
 async function agregarProducto() {
   if (currentUser!==0) { toast('Solo el Admin puede agregar productos','err'); return; }
-  const nombre = document.getElementById('f-nombre').value.trim();
-  const precio = parseFloat(document.getElementById('f-precio').value);
-  const stock  = parseInt(document.getElementById('f-stock').value);
-  if (!nombre||isNaN(precio)||isNaN(stock)) { toast('Completa todos los campos','err'); return; }
+  const nombre=document.getElementById('f-nombre').value.trim();
+  const precio=parseFloat(document.getElementById('f-precio').value);
+  const stock =parseInt(document.getElementById('f-stock').value);
+  if (!nombre||isNaN(precio)||isNaN(stock)) { toast('Completa los campos requeridos','err'); return; }
 
-  const btn = document.getElementById('btn-agregar');
-  btn.dataset.orig = '➕ Registrar Producto';
-  setLoading(btn,true);
+  const btn=document.getElementById('btn-agregar');
+  const orig='✨ Registrar Producto';
+  setLoading(btn,true,orig);
 
-  const res = await api({
-    action:'addProduct', nombre, cat:document.getElementById('f-cat').value,
-    precio, stock, minLow:document.getElementById('f-minlow').value||20,
-    minCrit:document.getElementById('f-mincrit').value||10,
-    unidad:document.getElementById('f-unidad').value, usuario:USERS[currentUser]
+  const res=await api({
+    action:'addProduct', nombre,
+    cat:document.getElementById('f-cat').value,
+    precio, costo:document.getElementById('f-costo').value||0, stock,
+    minLow:document.getElementById('f-minlow').value||15,
+    minCrit:document.getElementById('f-mincrit').value||5,
+    unidad:document.getElementById('f-unidad').value,
+    marca:document.getElementById('f-marca').value||'',
+    usuario:USERS[currentUser]
   });
-
-  setLoading(btn,false);
-  btn.innerHTML = '➕ Registrar Producto';
-
+  setLoading(btn,false,orig); btn.innerHTML=orig;
   if (res) {
-    toast(`"${nombre}" registrado en Google Sheets`);
-    ['f-nombre','f-precio','f-stock','f-minlow','f-mincrit'].forEach(id=>document.getElementById(id).value='');
+    toast(`"${nombre}" registrado`);
+    ['f-nombre','f-precio','f-costo','f-stock','f-minlow','f-mincrit','f-marca'].forEach(id=>document.getElementById(id).value='');
     await loadAll();
   }
 }
 
-// ── VENTA ──
+// ══════════════════════════════════════════
+//  VENTA
+// ══════════════════════════════════════════
 function openSell(id) {
   sellTarget = products.find(p=>p.id===id);
-  document.getElementById('sell-info').innerHTML =
-    `<strong>${sellTarget.nombre}</strong><br>Stock: <strong>${sellTarget.stock} ${sellTarget.unidad}</strong> · ${fmt(sellTarget.precio)} c/u`;
+  document.getElementById('sell-product-card').innerHTML=`
+    <div class="mpn">${sellTarget.nombre} ${sellTarget.marca?`<span style="color:var(--muted);font-weight:400">${sellTarget.marca}</span>`:''}</div>
+    <div class="mpm">
+      <span>Stock: <span>${sellTarget.stock} ${sellTarget.unidad}</span></span>
+      <span>Precio: <span>${fmt(sellTarget.precio)}</span></span>
+      ${sellTarget.costo>0?`<span>Costo: <span>${fmt(sellTarget.costo)}</span></span>`:''}
+    </div>`;
   document.getElementById('sell-qty').value=1;
-  document.getElementById('btn-sell-confirm').dataset.orig='Confirmar';
-  document.getElementById('btn-sell-confirm').innerHTML='Confirmar';
+  document.getElementById('sell-price').value=sellTarget.precio;
+  document.getElementById('sell-client').value='';
+  document.getElementById('sell-note').value='';
+  document.getElementById('sell-total').textContent=fmt(sellTarget.precio);
+  const btn=document.getElementById('btn-sell-confirm');
+  btn.innerHTML='Confirmar Venta'; btn.disabled=false;
   document.getElementById('modal-sell').classList.add('open');
 }
 
+function updateTotal() {
+  const qty=parseFloat(document.getElementById('sell-qty').value)||0;
+  const price=parseFloat(document.getElementById('sell-price').value)||0;
+  document.getElementById('sell-total').textContent=fmt(qty*price);
+}
+
 async function confirmarVenta() {
-  const qty = parseInt(document.getElementById('sell-qty').value);
+  const qty=parseInt(document.getElementById('sell-qty').value);
+  const price=parseFloat(document.getElementById('sell-price').value);
+  const client=document.getElementById('sell-client').value.trim();
+  const note=document.getElementById('sell-note').value.trim();
   if (!qty||qty<1) { toast('Cantidad inválida','err'); return; }
   if (qty>sellTarget.stock) { toast('Stock insuficiente','err'); return; }
 
-  const btn = document.getElementById('btn-sell-confirm');
-  setLoading(btn,true);
+  const btn=document.getElementById('btn-sell-confirm');
+  const orig='Confirmar Venta';
+  setLoading(btn,true,orig);
 
-  const res = await api({
+  const res=await api({
     action:'sellProduct', id:sellTarget.id, qty,
+    precioUnit:price, cliente:client, nota:note,
     usuario:USERS[currentUser]
   });
-
-  setLoading(btn,false);
-  btn.innerHTML='Confirmar';
-
+  setLoading(btn,false,orig); btn.innerHTML=orig;
   if (res) {
-    toast(`Venta registrada · Quedan ${res.newStock} ${sellTarget.unidad}`);
+    toast(`Venta registrada · ${fmt(qty*price)} · Quedan ${res.newStock} ${sellTarget.unidad}`);
     if (res.status==='critical') toast('🚨 STOCK CRÍTICO en '+sellTarget.nombre,'err');
     else if (res.status==='low')  toast('⚠️ Stock bajo en '+sellTarget.nombre,'err');
     closeModal('modal-sell');
@@ -617,62 +1016,74 @@ async function confirmarVenta() {
   }
 }
 
-// ── EDITAR ──
+// ══════════════════════════════════════════
+//  EDITAR
+// ══════════════════════════════════════════
 function openEdit(id) {
   if (currentUser!==0) { toast('Solo el Admin puede editar','err'); return; }
-  editTarget = products.find(p=>p.id===id);
-  document.getElementById('edit-nombre').value = editTarget.nombre;
-  document.getElementById('edit-precio').value = editTarget.precio;
-  document.getElementById('edit-stock').value  = editTarget.stock;
-  document.getElementById('edit-low').value    = editTarget.minLow;
-  document.getElementById('edit-crit').value   = editTarget.minCrit;
-  document.getElementById('btn-edit-confirm').dataset.orig='Guardar';
-  document.getElementById('btn-edit-confirm').innerHTML='Guardar';
+  editTarget=products.find(p=>p.id===id);
+  document.getElementById('edit-nombre').value=editTarget.nombre;
+  document.getElementById('edit-precio').value=editTarget.precio;
+  document.getElementById('edit-costo').value=editTarget.costo||0;
+  document.getElementById('edit-stock').value=editTarget.stock;
+  document.getElementById('edit-low').value=editTarget.minLow;
+  document.getElementById('edit-crit').value=editTarget.minCrit;
+  document.getElementById('edit-unidad').value=editTarget.unidad||'unidades';
+  const btn=document.getElementById('btn-edit-confirm');
+  btn.innerHTML='Guardar Cambios'; btn.disabled=false;
   document.getElementById('modal-edit').classList.add('open');
 }
 
 async function guardarEdicion() {
-  const nombre = document.getElementById('edit-nombre').value.trim();
-  const precio = parseFloat(document.getElementById('edit-precio').value);
-  const stock  = parseInt(document.getElementById('edit-stock').value);
+  const nombre=document.getElementById('edit-nombre').value.trim();
+  const precio=parseFloat(document.getElementById('edit-precio').value);
+  const stock=parseInt(document.getElementById('edit-stock').value);
   if (!nombre||isNaN(precio)||isNaN(stock)) { toast('Datos inválidos','err'); return; }
-
-  const btn = document.getElementById('btn-edit-confirm');
-  setLoading(btn,true);
-
-  const res = await api({
-    action:'updateProduct', id:editTarget.id, nombre, precio, stock,
+  const btn=document.getElementById('btn-edit-confirm');
+  const orig='Guardar Cambios';
+  setLoading(btn,true,orig);
+  const res=await api({
+    action:'updateProduct', id:editTarget.id, nombre, precio,
+    costo:document.getElementById('edit-costo').value||0, stock,
     minLow:document.getElementById('edit-low').value,
     minCrit:document.getElementById('edit-crit').value,
-    cat:editTarget.cat, unidad:editTarget.unidad, usuario:USERS[currentUser]
+    unidad:document.getElementById('edit-unidad').value,
+    cat:editTarget.cat, marca:editTarget.marca||'', usuario:USERS[currentUser]
   });
-
-  setLoading(btn,false); btn.innerHTML='Guardar';
-
-  if (res) { toast('Producto actualizado en Sheets'); closeModal('modal-edit'); await loadAll(); }
+  setLoading(btn,false,orig); btn.innerHTML=orig;
+  if (res) { toast('Producto actualizado'); closeModal('modal-edit'); await loadAll(); }
 }
 
-// ── ELIMINAR ──
+// ══════════════════════════════════════════
+//  ELIMINAR
+// ══════════════════════════════════════════
 async function eliminar(id) {
   if (currentUser!==0) { toast('Solo el Admin puede eliminar','err'); return; }
-  const p = products.find(x=>x.id===id);
-  if (!confirm(`¿Eliminar "${p.nombre}"? Esta acción no se puede deshacer.`)) return;
-  const res = await api({action:'deleteProduct', id, usuario:USERS[currentUser]});
+  const p=products.find(x=>x.id===id);
+  if (!confirm(`¿Eliminar "${p.nombre}"?`)) return;
+  const res=await api({action:'deleteProduct', id, usuario:USERS[currentUser]});
   if (res) { toast(`"${p.nombre}" eliminado`); await loadAll(); }
 }
 
-// ── MODAL ──
+// ══════════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════════
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
   sellTarget=null; editTarget=null;
 }
 
-// ── RENDER ALL ──
+// ══════════════════════════════════════════
+//  RENDER ALL
+// ══════════════════════════════════════════
 function renderAll() {
   renderDashboard();
   renderInventario();
+  renderVentasPage();
   renderAlertas();
+  renderActividad();
 }
 </script>
 </body>
 </html>
+
