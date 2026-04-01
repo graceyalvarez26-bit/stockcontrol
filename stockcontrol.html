@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockControl Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d0f14; --surface:#161a24; --surface2:#1e2436; --border:#2a3050;
+    --accent:#f0c040; --accent2:#4af0a0; --danger:#f05050; --warn:#f09040;
+    --text:#e8eaf0; --muted:#6a7290; --radius:12px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+  /* CONFIG BANNER */
+  #config-banner{
+    background:rgba(240,192,64,.12);border-bottom:1px solid rgba(240,192,64,.3);
+    padding:10px 32px;display:flex;align-items:center;gap:12px;font-size:.84rem;
+  }
+  #config-banner input{
+    background:var(--bg);border:1px solid var(--border);border-radius:6px;
+    padding:5px 10px;color:var(--text);font-family:'DM Mono',monospace;font-size:.78rem;
+    width:420px;outline:none;
+  }
+  #config-banner input:focus{border-color:var(--accent)}
+  .btn-config{
+    background:var(--accent);color:#111;font-family:'Syne',sans-serif;font-weight:700;
+    font-size:.8rem;padding:6px 14px;border:none;border-radius:6px;cursor:pointer;transition:.15s;
+  }
+  .btn-config:hover{filter:brightness(1.1)}
+  .config-ok{color:var(--accent2);font-family:'DM Mono',monospace;font-size:.78rem}
+
+  /* HEADER */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 32px;background:var(--surface);
+    border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;
+  }
+  .brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-.5px}
+  .brand span{color:var(--accent)}
+  .header-right{display:flex;align-items:center;gap:16px}
+  .sync-info{font-size:.75rem;color:var(--muted);font-family:'DM Mono',monospace}
+  .btn-refresh{
+    background:transparent;border:1px solid var(--border);border-radius:6px;
+    padding:6px 12px;color:var(--muted);cursor:pointer;font-size:.8rem;transition:.15s;
+  }
+  .btn-refresh:hover{border-color:var(--accent2);color:var(--accent2)}
+  .user-tabs{display:flex;gap:6px}
+  .user-tab{
+    font-size:.76rem;font-family:'DM Mono',monospace;padding:5px 12px;
+    border-radius:99px;border:1px solid var(--border);background:transparent;
+    color:var(--muted);cursor:pointer;transition:.2s;
+  }
+  .user-tab.active{background:var(--accent);color:#111;border-color:var(--accent);font-weight:500}
+  .user-tab:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+
+  /* LAYOUT */
+  .app{display:grid;grid-template-columns:248px 1fr;min-height:calc(100vh - 61px)}
+  aside{
+    background:var(--surface);border-right:1px solid var(--border);
+    padding:20px 14px;display:flex;flex-direction:column;gap:4px;
+  }
+  .nav-label{font-size:.66rem;font-family:'DM Mono',monospace;color:var(--muted);
+    padding:8px 12px 4px;letter-spacing:.1em;text-transform:uppercase}
+  .nav-btn{
+    display:flex;align-items:center;gap:10px;padding:9px 12px;
+    border-radius:8px;border:none;background:transparent;color:var(--muted);
+    cursor:pointer;font-size:.86rem;font-family:'DM Sans',sans-serif;
+    transition:.15s;width:100%;text-align:left;
+  }
+  .nav-btn .ico{font-size:.95rem;width:20px;text-align:center}
+  .nav-btn:hover{background:var(--surface2);color:var(--text)}
+  .nav-btn.active{background:rgba(240,192,64,.12);color:var(--accent)}
+  .nav-btn .badge{
+    margin-left:auto;font-size:.68rem;font-family:'DM Mono',monospace;
+    background:var(--danger);color:#fff;border-radius:99px;padding:1px 7px;min-width:20px;text-align:center;
+  }
+  .session-box{padding:12px;margin-top:auto;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+  .session-box .slbl{font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.06em}
+  .session-box .sval{font-size:.86rem;color:var(--text);margin-top:3px}
+  .session-box .srole{font-size:.72rem;color:var(--accent);font-family:'DM Mono',monospace}
+
+  /* MAIN */
+  main{padding:26px 30px;overflow-y:auto}
+  .page{display:none}
+  .page.active{display:block;animation:fadeIn .22s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.45rem;margin-bottom:4px}
+  .subtitle{color:var(--muted);font-size:.86rem;margin-bottom:22px}
+
+  /* STATS */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+  .stat-card .num{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:700}
+  .stat-card .lbl{font-size:.76rem;color:var(--muted);margin-top:2px}
+  .stat-card.warn-card{border-color:rgba(240,144,64,.35)}.stat-card.warn-card .num{color:var(--warn)}
+  .stat-card.danger-card{border-color:rgba(240,80,80,.35)}.stat-card.danger-card .num{color:var(--danger)}
+  .stat-card.value-card{border-color:rgba(74,240,160,.25)}.stat-card.value-card .num{color:var(--accent2)}
+
+  /* TABLE */
+  .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .table-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+  .table-head h3{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:600}
+  .search-box{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 11px}
+  .search-box input{background:none;border:none;outline:none;color:var(--text);font-size:.83rem;width:170px}
+  table{width:100%;border-collapse:collapse}
+  thead th{font-family:'DM Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--muted);padding:9px 18px;text-align:left;border-bottom:1px solid var(--border);font-weight:500}
+  tbody tr{border-bottom:1px solid rgba(42,48,80,.4);transition:.12s}
+  tbody tr:last-child{border:none}
+  tbody tr:hover{background:var(--surface2)}
+  td{padding:11px 18px;font-size:.86rem}
+  .prod-name{font-weight:500}
+  .prod-cat{font-size:.72rem;color:var(--muted);margin-top:1px;font-family:'DM Mono',monospace}
+  .price-cell{font-family:'DM Mono',monospace;color:var(--accent2)}
+  .stock-bar-wrap{display:flex;align-items:center;gap:8px}
+  .stock-bar{height:4px;border-radius:99px;background:var(--border);flex:1;min-width:50px}
+  .stock-fill{height:100%;border-radius:99px;transition:.4s}
+  .stock-num{font-family:'DM Mono',monospace;font-size:.83rem;min-width:28px}
+  .status-pill{font-size:.68rem;font-family:'DM Mono',monospace;padding:3px 9px;border-radius:99px;font-weight:500}
+  .ok{background:rgba(74,240,160,.1);color:var(--accent2)}
+  .low{background:rgba(240,144,64,.13);color:var(--warn)}
+  .critical{background:rgba(240,80,80,.13);color:var(--danger)}
+  .actions{display:flex;gap:5px;align-items:center}
+  .btn-ico{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);
+    background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    font-size:.85rem;transition:.15s;color:var(--text)}
+  .btn-ico:hover{border-color:var(--accent);color:var(--accent);background:rgba(240,192,64,.07)}
+  .btn-ico.danger:hover{border-color:var(--danger);color:var(--danger);background:rgba(240,80,80,.07)}
+  .btn-sell{font-size:.73rem;padding:4px 11px;border-radius:6px;
+    border:1px solid rgba(74,240,160,.3);background:rgba(74,240,160,.07);
+    color:var(--accent2);cursor:pointer;font-family:'DM Mono',monospace;transition:.15s}
+  .btn-sell:hover{background:rgba(74,240,160,.16)}
+
+  /* LOADING */
+  .loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--muted);gap:10px;font-family:'DM Mono',monospace;font-size:.84rem}
+  .spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* FORM */
+  .form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px;max-width:620px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-group{display:flex;flex-direction:column;gap:5px}
+  .form-group.full{grid-column:1/-1}
+  label{font-size:.74rem;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:.04em}
+  input,select{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:9px 12px;
+    color:var(--text);font-size:.88rem;font-family:'DM Sans',sans-serif;outline:none;transition:.15s;width:100%}
+  input:focus,select:focus{border-color:var(--accent)}
+  select option{background:var(--surface)}
+  .btn-primary{background:var(--accent);color:#111;font-family:'Syne',sans-serif;font-weight:700;
+    font-size:.9rem;padding:11px 26px;border:none;border-radius:7px;cursor:pointer;transition:.15s;margin-top:8px;
+    display:inline-flex;align-items:center;gap:8px}
+  .btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+  /* ALERTS */
+  .alert-list{display:flex;flex-direction:column;gap:8px}
+  .alert-item{display:flex;align-items:center;gap:14px;background:var(--surface);
+    border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px}
+  .alert-item.warn{border-left:3px solid var(--warn)}
+  .alert-item.crit{border-left:3px solid var(--danger);background:rgba(240,80,80,.04)}
+  .alert-ico{font-size:1.25rem}
+  .alert-body{flex:1}
+  .alert-title{font-weight:500;font-size:.9rem}
+  .alert-desc{font-size:.78rem;color:var(--muted);margin-top:2px}
+
+  /* LOG */
+  .log-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(42,48,80,.4)}
+  .log-item:last-child{border:none}
+  .log-dot{width:7px;height:7px;border-radius:50%;margin-top:6px;flex-shrink:0}
+  .log-text{font-size:.84rem}
+  .log-meta{font-size:.72rem;color:var(--muted);margin-top:1px;font-family:'DM Mono',monospace}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:26px;width:90%;max-width:440px;animation:fadeIn .2s ease}
+  .modal h3{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:16px}
+  .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);
+    padding:8px 18px;border-radius:7px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s}
+  .btn-ghost:hover{border-color:var(--muted)}
+
+  /* TOAST */
+  #toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--surface);
+    border:1px solid var(--border);border-radius:9px;padding:12px 18px;font-size:.86rem;
+    display:none;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:300px}
+  #toast.show{display:block;animation:fadeIn .25s ease}
+
+  /* EMPTY */
+  .empty{padding:32px;text-align:center;color:var(--muted);font-size:.86rem}
+
+  @media(max-width:860px){
+    .app{grid-template-columns:1fr}
+    aside{display:none}
+    .stats{grid-template-columns:1fr 1fr}
+    header{flex-wrap:wrap;gap:8px}
+  }
+</style>
+</head>
+<body>
+
+<!-- BANNER CONFIGURACIÓN -->
+<div id="config-banner">
+  <span>🔗</span>
+  <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.78rem">URL del Web App:</span>
+  <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/TU_ID_AQUÍ/exec">
+  <button class="btn-config" onclick="saveApiUrl()">Conectar</button>
+  <span class="config-ok" id="conn-status"></span>
+</div>
+
+<header>
+  <div class="brand">Stock<span>Control</span></div>
+  <div class="header-right">
+    <span class="sync-info" id="sync-time">Sin sincronizar</span>
+    <button class="btn-refresh" onclick="loadAll()">⟳ Actualizar</button>
+    <div class="user-tabs">
+      <button class="user-tab active" onclick="switchUser(0)">👤 Admin</button>
+      <button class="user-tab" onclick="switchUser(1)">👤 Usuario 2</button>
+      <button class="user-tab" onclick="switchUser(2)">👤 Usuario 3</button>
+      <button class="user-tab" onclick="switchUser(3)">👤 Usuario 4</button>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <aside>
+    <div class="nav-label">Menú</div>
+    <button class="nav-btn active" onclick="showPage('dashboard')"><span class="ico">📊</span> Dashboard</button>
+    <button class="nav-btn" onclick="showPage('inventario')"><span class="ico">📦</span> Inventario</button>
+    <button class="nav-btn" id="nav-agregar" onclick="showPage('agregar')"><span class="ico">➕</span> Agregar Producto</button>
+    <button class="nav-btn" onclick="showPage('alertas')">
+      <span class="ico">🔔</span> Alertas
+      <span class="badge" id="badge-alertas">0</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('actividad')"><span class="ico">📋</span> Actividad</button>
+    <div style="margin-top:auto">
+      <div class="session-box">
+        <div class="slbl">SESIÓN ACTUAL</div>
+        <div class="sval" id="sess-name">Admin</div>
+        <div class="srole" id="sess-role">● ADMINISTRADOR</div>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <h2>Dashboard</h2>
+      <p class="subtitle">Resumen en tiempo real · datos desde Google Sheets</p>
+      <div class="stats" id="stats-grid">
+        <div class="stat-card"><div class="num">—</div><div class="lbl">Total Productos</div></div>
+        <div class="stat-card value-card"><div class="num">—</div><div class="lbl">Valor en Stock</div></div>
+        <div class="stat-card warn-card"><div class="num">—</div><div class="lbl">Con Alertas</div></div>
+        <div class="stat-card danger-card"><div class="num">—</div><div class="lbl">Stock Crítico</div></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head"><h3>Productos Críticos</h3></div>
+        <div id="critical-list" class="loading"><div class="spin"></div> Cargando...</div>
+      </div>
+    </div>
+
+    <!-- INVENTARIO -->
+    <div class="page" id="page-inventario">
+      <h2>Inventario</h2>
+      <p class="subtitle">Todos los productos registrados en Google Sheets</p>
+      <div class="table-wrap">
+        <div class="table-head">
+          <h3>Productos</h3>
+          <div class="search-box">🔍 <input type="text" id="search-input" placeholder="Buscar..." oninput="renderInventario()"></div>
+        </div>
+        <div id="inv-container" class="loading"><div class="spin"></div> Cargando...</div>
+      </div>
+    </div>
+
+    <!-- AGREGAR -->
+    <div class="page" id="page-agregar">
+      <h2>Agregar Producto</h2>
+      <p class="subtitle">El producto se guardará directamente en Google Sheets</p>
+      <div class="form-card">
+        <div class="form-grid">
+          <div class="form-group full"><label>NOMBRE DEL PRODUCTO</label><input type="text" id="f-nombre" placeholder="Ej: Cemento Portland 50kg"></div>
+          <div class="form-group"><label>CATEGORÍA</label>
+            <select id="f-cat">
+              <option>General</option><option>Construcción</option><option>Ferretería</option>
+              <option>Eléctrico</option><option>Plomería</option><option>Acabados</option><option>Herramientas</option>
+            </select>
+          </div>
+          <div class="form-group"><label>PRECIO UNITARIO ($)</label><input type="number" id="f-precio" placeholder="0.00" min="0" step="0.01"></div>
+          <div class="form-group"><label>CANTIDAD EN STOCK</label><input type="number" id="f-stock" placeholder="0" min="0"></div>
+          <div class="form-group"><label>ALERTA MÍNIMA (BAJO)</label><input type="number" id="f-minlow" placeholder="20" min="0"></div>
+          <div class="form-group"><label>ALERTA CRÍTICA (URGENTE)</label><input type="number" id="f-mincrit" placeholder="10" min="0"></div>
+          <div class="form-group full"><label>UNIDAD DE MEDIDA</label>
+            <select id="f-unidad">
+              <option value="unidades">Unidades</option><option value="kg">Kilogramos</option>
+              <option value="litros">Litros</option><option value="metros">Metros</option>
+              <option value="sacos">Sacos</option><option value="rollos">Rollos</option><option value="cajas">Cajas</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" id="btn-agregar" onclick="agregarProducto()">➕ Registrar Producto</button>
+      </div>
+    </div>
+
+    <!-- ALERTAS -->
+    <div class="page" id="page-alertas">
+      <h2>🔔 Alertas de Stock</h2>
+      <p class="subtitle">Productos que requieren reposición</p>
+      <div class="alert-list" id="alert-list"><div class="loading"><div class="spin"></div> Cargando...</div></div>
+    </div>
+
+    <!-- ACTIVIDAD -->
+    <div class="page" id="page-actividad">
+      <h2>Registro de Actividad</h2>
+      <p class="subtitle">Historial guardado en Google Sheets · visible para todos los usuarios</p>
+      <div class="table-wrap">
+        <div style="padding:6px 18px 0" id="activity-log"><div class="loading"><div class="spin"></div> Cargando...</div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL VENDER -->
+<div class="modal-overlay" id="modal-sell">
+  <div class="modal">
+    <h3>💸 Registrar Venta</h3>
+    <div id="sell-info" style="margin-bottom:14px;font-size:.86rem;color:var(--muted)"></div>
+    <div class="form-group">
+      <label>CANTIDAD A VENDER</label>
+      <input type="number" id="sell-qty" min="1" placeholder="1">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-ghost" onclick="closeModal('modal-sell')">Cancelar</button>
+      <button class="btn-primary" id="btn-sell-confirm" onclick="confirmarVenta()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <h3>✏️ Editar Producto</h3>
+    <div class="form-group" style="margin-bottom:12px"><label>NOMBRE</label><input type="text" id="edit-nombre"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-group"><label>PRECIO ($)</label><input type="number" id="edit-precio" step="0.01"></div>
+      <div class="form-group"><label>STOCK</label><input type="number" id="edit-stock" min="0"></div>
+      <div class="form-group"><label>MÍN BAJO</label><input type="number" id="edit-low" min="0"></div>
+      <div class="form-group"><label>MÍN CRÍTICO</label><input type="number" id="edit-crit" min="0"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-ghost" onclick="closeModal('modal-edit')">Cancelar</button>
+      <button class="btn-primary" id="btn-edit-confirm" onclick="guardarEdicion()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ──
+const USERS = ['Admin','Usuario 2','Usuario 3','Usuario 4'];
+let currentUser = 0;
+let API_URL = localStorage.getItem('stockcontrol_api') || '';
+let products = [];
+let sellTarget = null;
+let editTarget = null;
+
+// ── API URL ──
+function saveApiUrl() {
+  const url = document.getElementById('api-url-input').value.trim();
+  if (!url.startsWith('https://script.google.com')) { toast('URL inválida. Debe ser de script.google.com','err'); return; }
+  API_URL = url;
+  localStorage.setItem('stockcontrol_api', url);
+  document.getElementById('conn-status').textContent = '✓ URL guardada';
+  loadAll();
+}
+
+// ── API CALL ──
+async function api(params) {
+  if (!API_URL) { toast('Configura la URL del Web App primero','err'); return null; }
+  const url = API_URL + '?' + new URLSearchParams(params).toString();
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.error) { toast('Error: '+data.error,'err'); return null; }
+    return data;
+  } catch(e) {
+    toast('Error de conexión con Google Sheets','err');
+    return null;
+  }
+}
+
+// ── LOAD ALL ──
+async function loadAll() {
+  if (!API_URL) return;
+  const [pd, ad] = await Promise.all([
+    api({action:'getProducts'}),
+    api({action:'getActivity'})
+  ]);
+  if (pd) products = pd.products;
+  if (ad) renderActividad(ad.logs);
+  renderAll();
+  document.getElementById('sync-time').textContent = 'Sync: '+new Date().toLocaleTimeString('es-EC');
+}
+
+// ── AUTO REFRESH cada 30s ──
+setInterval(() => { if(API_URL) loadAll(); }, 30000);
+
+// ── INIT API URL ──
+if (API_URL) {
+  document.getElementById('api-url-input').value = API_URL;
+  document.getElementById('conn-status').textContent = '✓ URL cargada';
+  loadAll();
+}
+
+// ── UTILIDADES ──
+function getStatus(p) {
+  if (p.stock <= p.minCrit) return 'critical';
+  if (p.stock <= p.minLow)  return 'low';
+  return 'ok';
+}
+function statusLabel(s) { return {ok:'Disponible',low:'Stock Bajo',critical:'Stock Crítico'}[s]; }
+function pct(p) { return Math.min(100, Math.round(p.stock / Math.max(p.minLow*3,1) * 100)); }
+function barColor(s) { return {ok:'#4af0a0',low:'#f09040',critical:'#f05050'}[s]; }
+function fmt(n) { return '$'+Number(n).toFixed(2); }
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.innerHTML = (type==='ok'?'✅':'⚠️')+' '+msg;
+  t.style.borderColor = type==='ok'?'var(--accent2)':'var(--danger)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+function setLoading(btn, loading) {
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.innerHTML = loading ? '<div class="spin" style="width:14px;height:14px;border-width:2px"></div> Guardando...' : btn.dataset.orig;
+}
+
+// ── NAVEGACIÓN ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const pages = ['dashboard','inventario','agregar','alertas','actividad'];
+  const idx = pages.indexOf(id);
+  document.querySelectorAll('.nav-btn')[idx]?.classList.add('active');
+}
+
+function switchUser(i) {
+  currentUser = i;
+  document.querySelectorAll('.user-tab').forEach((t,j)=>t.classList.toggle('active',i===j));
+  document.getElementById('sess-name').textContent = USERS[i];
+  document.getElementById('sess-role').textContent = i===0 ? '● ADMINISTRADOR' : '● VISUALIZADOR';
+  const addBtn = document.getElementById('nav-agregar');
+  addBtn.style.opacity = i===0?'1':'.35';
+  addBtn.style.pointerEvents = i===0?'auto':'none';
+  renderAll();
+}
+
+// ── RENDER DASHBOARD ──
+function renderDashboard() {
+  const total = products.length;
+  const alerts = products.filter(p=>getStatus(p)!=='ok').length;
+  const criticos = products.filter(p=>getStatus(p)==='critical').length;
+  const valor = products.reduce((s,p)=>s+p.precio*p.stock,0);
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="num">${total}</div><div class="lbl">Total Productos</div></div>
+    <div class="stat-card value-card"><div class="num">${fmt(valor)}</div><div class="lbl">Valor en Stock</div></div>
+    <div class="stat-card warn-card"><div class="num">${alerts}</div><div class="lbl">Con Alertas</div></div>
+    <div class="stat-card danger-card"><div class="num">${criticos}</div><div class="lbl">Stock Crítico</div></div>`;
+
+  const probs = products.filter(p=>getStatus(p)!=='ok').sort((a,b)=>a.stock-b.stock);
+  const cl = document.getElementById('critical-list');
+  if (!probs.length) { cl.innerHTML='<div class="empty">✅ Todos los productos tienen stock suficiente</div>'; return; }
+  cl.innerHTML = '<div style="padding:12px 18px;display:flex;flex-direction:column;gap:8px">'+probs.map(p=>{
+    const s=getStatus(p);
+    return `<div class="alert-item ${s==='critical'?'crit':'warn'}">
+      <span class="alert-ico">${s==='critical'?'🚨':'⚠️'}</span>
+      <div class="alert-body"><div class="alert-title">${p.nombre}</div>
+      <div class="alert-desc">${p.cat} · Stock: <strong>${p.stock} ${p.unidad}</strong> · Mín. crítico: ${p.minCrit}</div></div>
+      <span class="status-pill ${s}">${statusLabel(s)}</span></div>`;
+  }).join('')+'</div>';
+}
+
+// ── RENDER INVENTARIO ──
+function renderInventario() {
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
+  const filtered = products.filter(p=>p.nombre.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q));
+  const isAdmin = currentUser===0;
+  const container = document.getElementById('inv-container');
+
+  if (!filtered.length) { container.innerHTML='<div class="empty">Sin productos que coincidan</div>'; return; }
+
+  container.innerHTML = `<table>
+    <thead><tr>
+      <th>Producto</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acción</th>
+    </tr></thead>
+    <tbody>
+    ${filtered.map(p=>{
+      const s=getStatus(p); const bar=pct(p);
+      return `<tr>
+        <td><div class="prod-name">${p.nombre}</div><div class="prod-cat">${p.cat} · ${p.unidad}</div></td>
+        <td class="price-cell">${fmt(p.precio)}</td>
+        <td><div class="stock-bar-wrap">
+          <div class="stock-bar"><div class="stock-fill" style="width:${bar}%;background:${barColor(s)}"></div></div>
+          <span class="stock-num">${p.stock}</span></div></td>
+        <td><span class="status-pill ${s}">${statusLabel(s)}</span></td>
+        <td><div class="actions">
+          <button class="btn-sell" onclick="openSell(${p.id})">Vender</button>
+          ${isAdmin?`<button class="btn-ico" onclick="openEdit(${p.id})" title="Editar">✏️</button>
+          <button class="btn-ico danger" onclick="eliminar(${p.id})" title="Eliminar">🗑️</button>`:''}
+        </div></td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>`;
+}
+
+// ── RENDER ALERTAS ──
+function renderAlertas() {
+  const probs = products.filter(p=>getStatus(p)!=='ok');
+  document.getElementById('badge-alertas').textContent = probs.length;
+  const al = document.getElementById('alert-list');
+  if (!probs.length) { al.innerHTML='<div class="empty">✅ No hay alertas activas</div>'; return; }
+  al.innerHTML = probs.sort((a,b)=>a.stock-b.stock).map(p=>{
+    const s=getStatus(p);
+    return `<div class="alert-item ${s==='critical'?'crit':'warn'}">
+      <span class="alert-ico" style="font-size:1.4rem">${s==='critical'?'🚨':'⚠️'}</span>
+      <div class="alert-body"><div class="alert-title">${p.nombre}</div>
+      <div class="alert-desc">
+        ${s==='critical'?'<strong style="color:var(--danger)">URGENTE · Reposición inmediata</strong>':'Reabastecer pronto'}
+        · Quedan <strong>${p.stock} ${p.unidad}</strong> · Mín bajo: ${p.minLow} · Mín crítico: ${p.minCrit}
+      </div></div>
+      <span class="status-pill ${s}">${statusLabel(s)}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER ACTIVIDAD ──
+function renderActividad(logs) {
+  const container = document.getElementById('activity-log');
+  if (!logs || !logs.length) { container.innerHTML='<div class="empty">Sin actividad registrada aún</div>'; return; }
+  container.innerHTML = logs.map(a=>`
+    <div class="log-item">
+      <div class="log-dot" style="background:${a.color||'#4af0a0'}"></div>
+      <div><div class="log-text">${a.detail}</div>
+      <div class="log-meta">${a.user} · ${a.time}</div></div>
+    </div>`).join('');
+}
+
+// ── AGREGAR ──
+async function agregarProducto() {
+  if (currentUser!==0) { toast('Solo el Admin puede agregar productos','err'); return; }
+  const nombre = document.getElementById('f-nombre').value.trim();
+  const precio = parseFloat(document.getElementById('f-precio').value);
+  const stock  = parseInt(document.getElementById('f-stock').value);
+  if (!nombre||isNaN(precio)||isNaN(stock)) { toast('Completa todos los campos','err'); return; }
+
+  const btn = document.getElementById('btn-agregar');
+  btn.dataset.orig = '➕ Registrar Producto';
+  setLoading(btn,true);
+
+  const res = await api({
+    action:'addProduct', nombre, cat:document.getElementById('f-cat').value,
+    precio, stock, minLow:document.getElementById('f-minlow').value||20,
+    minCrit:document.getElementById('f-mincrit').value||10,
+    unidad:document.getElementById('f-unidad').value, usuario:USERS[currentUser]
+  });
+
+  setLoading(btn,false);
+  btn.innerHTML = '➕ Registrar Producto';
+
+  if (res) {
+    toast(`"${nombre}" registrado en Google Sheets`);
+    ['f-nombre','f-precio','f-stock','f-minlow','f-mincrit'].forEach(id=>document.getElementById(id).value='');
+    await loadAll();
+  }
+}
+
+// ── VENTA ──
+function openSell(id) {
+  sellTarget = products.find(p=>p.id===id);
+  document.getElementById('sell-info').innerHTML =
+    `<strong>${sellTarget.nombre}</strong><br>Stock: <strong>${sellTarget.stock} ${sellTarget.unidad}</strong> · ${fmt(sellTarget.precio)} c/u`;
+  document.getElementById('sell-qty').value=1;
+  document.getElementById('btn-sell-confirm').dataset.orig='Confirmar';
+  document.getElementById('btn-sell-confirm').innerHTML='Confirmar';
+  document.getElementById('modal-sell').classList.add('open');
+}
+
+async function confirmarVenta() {
+  const qty = parseInt(document.getElementById('sell-qty').value);
+  if (!qty||qty<1) { toast('Cantidad inválida','err'); return; }
+  if (qty>sellTarget.stock) { toast('Stock insuficiente','err'); return; }
+
+  const btn = document.getElementById('btn-sell-confirm');
+  setLoading(btn,true);
+
+  const res = await api({
+    action:'sellProduct', id:sellTarget.id, qty,
+    usuario:USERS[currentUser]
+  });
+
+  setLoading(btn,false);
+  btn.innerHTML='Confirmar';
+
+  if (res) {
+    toast(`Venta registrada · Quedan ${res.newStock} ${sellTarget.unidad}`);
+    if (res.status==='critical') toast('🚨 STOCK CRÍTICO en '+sellTarget.nombre,'err');
+    else if (res.status==='low')  toast('⚠️ Stock bajo en '+sellTarget.nombre,'err');
+    closeModal('modal-sell');
+    await loadAll();
+  }
+}
+
+// ── EDITAR ──
+function openEdit(id) {
+  if (currentUser!==0) { toast('Solo el Admin puede editar','err'); return; }
+  editTarget = products.find(p=>p.id===id);
+  document.getElementById('edit-nombre').value = editTarget.nombre;
+  document.getElementById('edit-precio').value = editTarget.precio;
+  document.getElementById('edit-stock').value  = editTarget.stock;
+  document.getElementById('edit-low').value    = editTarget.minLow;
+  document.getElementById('edit-crit').value   = editTarget.minCrit;
+  document.getElementById('btn-edit-confirm').dataset.orig='Guardar';
+  document.getElementById('btn-edit-confirm').innerHTML='Guardar';
+  document.getElementById('modal-edit').classList.add('open');
+}
+
+async function guardarEdicion() {
+  const nombre = document.getElementById('edit-nombre').value.trim();
+  const precio = parseFloat(document.getElementById('edit-precio').value);
+  const stock  = parseInt(document.getElementById('edit-stock').value);
+  if (!nombre||isNaN(precio)||isNaN(stock)) { toast('Datos inválidos','err'); return; }
+
+  const btn = document.getElementById('btn-edit-confirm');
+  setLoading(btn,true);
+
+  const res = await api({
+    action:'updateProduct', id:editTarget.id, nombre, precio, stock,
+    minLow:document.getElementById('edit-low').value,
+    minCrit:document.getElementById('edit-crit').value,
+    cat:editTarget.cat, unidad:editTarget.unidad, usuario:USERS[currentUser]
+  });
+
+  setLoading(btn,false); btn.innerHTML='Guardar';
+
+  if (res) { toast('Producto actualizado en Sheets'); closeModal('modal-edit'); await loadAll(); }
+}
+
+// ── ELIMINAR ──
+async function eliminar(id) {
+  if (currentUser!==0) { toast('Solo el Admin puede eliminar','err'); return; }
+  const p = products.find(x=>x.id===id);
+  if (!confirm(`¿Eliminar "${p.nombre}"? Esta acción no se puede deshacer.`)) return;
+  const res = await api({action:'deleteProduct', id, usuario:USERS[currentUser]});
+  if (res) { toast(`"${p.nombre}" eliminado`); await loadAll(); }
+}
+
+// ── MODAL ──
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  sellTarget=null; editTarget=null;
+}
+
+// ── RENDER ALL ──
+function renderAll() {
+  renderDashboard();
+  renderInventario();
+  renderAlertas();
+}
+</script>
+</body>
+</html>
